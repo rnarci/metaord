@@ -1,3 +1,145 @@
-my_function <- functio(x) {
-  x
+############################## Collect all statements from distance matrix (symetric)
+
+collect_all_statements_distance <- function(L) {
+  n = dim(L)[1]
+  S = matrix(NA,nrow=n^3,ncol=4) # statements
+  statement = 1
+  
+  for(i in 1:(n-2)){
+      for (j in (i+1):(n-1)){
+        for(k in (j+1):n){
+          if(L[i,j]<L[j,k] & L[i,k]<L[j,k]){
+            S[statement,1] = i
+            S[statement,2:4] = sort(c(i,j,k))
+            statement = statement + 1           
+          }
+          if(L[j,i]<L[i,k] & L[j,k]<L[i,k]){
+            S[statement,1] = j
+            S[statement,2:4] = sort(c(i,j,k))
+            statement = statement + 1           
+          }
+          if(L[k,i]<L[i,j] & L[k,j]<L[i,j]){
+            S[statement,1] = k
+            S[statement,2:4] = sort(c(i,j,k))
+            statement = statement + 1           
+          }
+        }
+      }
+    }
+  return(na.omit(S))
+  }
+
+
+############################## Create two-moons data set
+
+.numObjects<-function(numObjects,numClusters){
+  if(length(numObjects)<numClusters){
+    numObjects<-rep(numObjects,numClusters)
+  }
+  if(length(numObjects)>numClusters){
+    numObjects<-numObjects[1:numClusters]
+  }
+  numObjects
 }
+
+shapes.two.moon<-function(numObjects=180,shape1a=-0.4,shape2b=1,shape1rFrom=0.8, shape1rTo=1.2,shape2rFrom=0.8, shape2rTo=1.2, outputCsv="", outputCsv2="", outputColNames=TRUE, outputRowNames=TRUE){
+  lo<-.numObjects(numObjects,2)
+  x <- matrix(0, nrow=sum(lo), ncol=2)
+  
+  for(i in 1:sum(lo)){
+    alpha<-runif(1,0,2*pi)
+    if(i>lo[1]){
+      r=runif(1,shape2rFrom,shape2rTo)
+    }
+    else{
+      r=runif(1,shape1rFrom,shape1rTo)
+    }
+    x[i,1]<-r*cos(alpha)
+    x[i,2]<-r*sin(alpha)
+    if(i<=lo[1]){
+      x[i,1]=shape1a+abs(x[i,1])
+    }
+    else{
+      x[i,1]=-abs(x[i,1])
+      x[i,2]=x[i,2]-shape2b
+    }
+  }
+  data<-x
+  klasy<-c(rep(1,lo[1]),rep(2,lo[2]))
+  .toCsv(outputCsv,data,klasy,outputColNames, outputRowNames,FALSE)
+  .toCsv(outputCsv2,data,klasy, outputColNames, outputRowNames,TRUE)
+  list(data=data,clusters=klasy)
+}
+
+############################## Algorithm 5 Clustering : unweighted version
+
+k_RNG_clustering_unweighted <- function(S,k,l,n_data){
+  n_statements = dim(S)[1]
+  n_data = n_data
+  N = matrix(0,nrow=n_data,ncol=n_data)
+  D = matrix(0,nrow=n_data,ncol=n_data)
+  V = matrix(NA,nrow=n_data,ncol=n_data)
+  W = matrix(NA,nrow=n_data,ncol=n_data)
+  
+  for(i in 1:n_data){
+    for(j in 1:n_data){
+      for(y in 1:n_statements){
+        if((S[y,2]==i | S[y,3]==i | S[y,4]==i) & (S[y,2]==j | S[y,3]==j | S[y,4]==j)){
+          D[i,j] = D[i,j]+1
+          if(S[y,1]!=i & S[y,1]!=j){
+            N[i,j]=N[i,j]+1
+          }
+        }
+      }
+      if(D[i,j]==0){
+        V[i,j] = 1000000 
+      }else{
+        V[i,j] = N[i,j]/D[i,j]
+      }
+      if(V[i,j]<k/(n_data-2)){
+        W[i,j] = 1 
+      }else{
+        W[i,j] = 0
+      }
+    }
+  }
+  return(W)
+}
+
+
+############################## Algorithm 5 Clustering : weighted version
+
+k_RNG_clustering_weighted <- function(S,k,l,n_data,sigma){
+  n_statements = dim(S)[1]
+  n_data = n_data
+  sigma = sigma
+  N = matrix(0,nrow=n_data,ncol=n_data)
+  D = matrix(0,nrow=n_data,ncol=n_data)
+  V = matrix(NA,nrow=n_data,ncol=n_data)
+  W = matrix(NA,nrow=n_data,ncol=n_data)
+  
+  for(i in 1:n_data){
+    for(j in 1:n_data){
+      for(y in 1:n_statements){
+        if((S[y,2]==i | S[y,3]==i | S[y,4]==i) & (S[y,2]==j | S[y,3]==j | S[y,4]==j)){
+          D[i,j] = D[i,j]+1
+          if(S[y,1]!=i & S[y,1]!=j){
+            N[i,j]=N[i,j]+1
+          }
+        }
+      }
+      if(D[i,j]==0){
+        V[i,j] = 1000000 
+      }else{
+        V[i,j] = N[i,j]/D[i,j]
+      }
+      if(V[i,j]<k/(n_data-2)){
+        W[i,j] = exp(-(V[i,j]^2)/(sigma^2)) 
+      }else{
+        W[i,j] = 0
+      }
+    }
+  }
+  return(W)
+}
+
