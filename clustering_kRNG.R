@@ -1,8 +1,10 @@
 rm(list=objects())
 
+library(fcd)
+
 ############################## Create data set
 
-half_n = 25
+half_n = 50
 
 ########## 1) Two-moons data set
 
@@ -20,7 +22,9 @@ square = matrix(c(dim1,dim2),nrow=2*half_n,ncol=2)
 
 ########## 3) Choose the data set
 
-data   = square
+data   = moons
+
+par(mfrow=c(1,1))
 
 if(data[1,1]==moons[1,1]){
 
@@ -45,23 +49,44 @@ S = collect_all_statements_distance(L)
 
 ########## Optional : collect an arbitrary collection of statements from all statements
 
-n_statements = 8000
+n_statements = 10000
 u = ceiling(runif(n_statements,0,dim(S)[1]))
 S_subset = S[u,]
 
 ############################## Perform Algorithm 5 Clustering
 
 n_data = half_n*2
-k = 5
+k = 20
 l = 2
 sigma = 5
 
 kRNG = k_RNG_clustering_unweighted(S=S_subset,n_data=n_data,k=k,l=l) 
 
-for(i in 1:(n_data-1)){
-  for(j in (i+1):n_data){
-    if(kRNG[i,j]==1){
-      lines(c(data[i,1],data[j,1]),c(data[i,2],data[j,2]),col="blue")
-      }
-  }
+# for(i in 1:(n_data-1)){
+#   for(j in (i+1):n_data){
+#     if(kRNG[i,j]==1){
+#       lines(c(data[i,1],data[j,1]),c(data[i,2],data[j,2]),col="blue")
+#       }
+#   }
+# }
+
+res = spectral.clustering(kRNG, normalised = TRUE, score = FALSE, K = 2, adj = FALSE)
+
+par(mfrow=c(1,2))
+
+if(data[1,1]==moons[1,1]){
+  plot(moons[1:half_n,1],moons[1:half_n,2],xlim=c(-1.5,2),ylim=c(-2.5,1.5),xlab="",ylab="",col="green")
+  points(moons[(half_n+1):(2*half_n),1],moons[(half_n+1):(2*half_n),2],col="red")
+  
+  plot(moons[which(res==1),1],moons[which(res==1),2],xlim=c(-1.5,2),ylim=c(-2.5,1.5),xlab="",ylab="",col="red")
+  points(moons[which(res==2),1],moons[which(res==2),2],col="green")
+}else{
+  plot(square[1:half_n,1],square[1:half_n,2],xlim=c(-1,4),ylim=c(-1,4),xlab="",ylab="",col="green")
+  points(square[(half_n+1):(2*half_n),1],square[(half_n+1):(2*half_n),2],col="red")
+
+  plot(square[which(res==1),1],square[which(res==1),2],xlim=c(-1,4),ylim=c(-1,4),xlab="",ylab="",col="red")
+  points(square[which(res==2),1],square[which(res==2),2],col="green")
 }
+
+
+

@@ -53,7 +53,7 @@ collect_all_statements_distance <- function(L) {
   }
 }
 
-shapes.two.moon<-function(numObjects=180,shape1a=-0.4,shape2b=1,shape1rFrom=0.8, shape1rTo=1.2,shape2rFrom=0.8, shape2rTo=1.2, outputCsv="", outputCsv2="", outputColNames=TRUE, outputRowNames=TRUE){
+shapes.two.moon<-function(numObjects,shape1a,shape2b,shape1rFrom, shape1rTo,shape2rFrom, shape2rTo, outputCsv, outputCsv2, outputColNames, outputRowNames){
   lo<-.numObjects(numObjects,2)
   x <- matrix(0, nrow=sum(lo), ncol=2)
   
