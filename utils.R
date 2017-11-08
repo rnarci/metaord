@@ -42,6 +42,17 @@ collect_all_statements_distance <- function(L) {
   numObjects
 }
 
+.toCsv<-function(file,data,klasy,outputRowNames,outputColNames,csv2){
+  if(paste(file,"",sep="")!=""){
+    if(csv2){
+      write.table(cbind(1:dim(data)[1],klasy,data),file=file,sep=";",dec=",",row.names=outputRowNames,col.names=outputColNames)
+    }
+    else{
+      write.table(cbind(1:dim(data)[1],klasy,data),file=file,row.names=outputRowNames,col.names=outputColNames)
+    }
+  }
+}
+
 shapes.two.moon<-function(numObjects=180,shape1a=-0.4,shape2b=1,shape1rFrom=0.8, shape1rTo=1.2,shape2rFrom=0.8, shape2rTo=1.2, outputCsv="", outputCsv2="", outputColNames=TRUE, outputRowNames=TRUE){
   lo<-.numObjects(numObjects,2)
   x <- matrix(0, nrow=sum(lo), ncol=2)
@@ -84,7 +95,7 @@ k_RNG_clustering_unweighted <- function(S,k,l,n_data){
   for(i in 1:n_data){
     for(j in 1:n_data){
       for(y in 1:n_statements){
-        if((S[y,2]==i | S[y,3]==i | S[y,4]==i) & (S[y,2]==j | S[y,3]==j | S[y,4]==j)){
+        if(i!=j & (S[y,2]==i | S[y,3]==i | S[y,4]==i) & (S[y,2]==j | S[y,3]==j | S[y,4]==j)){
           D[i,j] = D[i,j]+1
           if(S[y,1]!=i & S[y,1]!=j){
             N[i,j]=N[i,j]+1
@@ -121,7 +132,7 @@ k_RNG_clustering_weighted <- function(S,k,l,n_data,sigma){
   for(i in 1:n_data){
     for(j in 1:n_data){
       for(y in 1:n_statements){
-        if((S[y,2]==i | S[y,3]==i | S[y,4]==i) & (S[y,2]==j | S[y,3]==j | S[y,4]==j)){
+        if(i!=j & (S[y,2]==i | S[y,3]==i | S[y,4]==i) & (S[y,2]==j | S[y,3]==j | S[y,4]==j)){
           D[i,j] = D[i,j]+1
           if(S[y,1]!=i & S[y,1]!=j){
             N[i,j]=N[i,j]+1
