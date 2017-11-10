@@ -114,7 +114,8 @@ k_RNG_clustering_unweighted <- function(S,k,l,n_data){
       }
     }
   }
-  return(W)
+  res = spectral.clustering(W, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  return(list(res=res,kRNG=W))
 }
 
 
@@ -151,6 +152,7 @@ k_RNG_clustering_weighted <- function(S,k,l,n_data,sigma){
       }
     }
   }
-  return(W)
+  res = spectral.clustering(W, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  return(list(res=res,kRNG=W))
 }
 

@@ -56,21 +56,23 @@ S_subset = S[u,]
 ############################## Perform Algorithm 5 Clustering
 
 n_data = half_n*2
-k = 20
+k = 2
 l = 2
 sigma = 5
 
-kRNG = k_RNG_clustering_unweighted(S=S_subset,n_data=n_data,k=k,l=l) 
+algo = k_RNG_clustering_unweighted(S=S_subset,n_data=n_data,k=k,l=l)
 
-# for(i in 1:(n_data-1)){
-#   for(j in (i+1):n_data){
-#     if(kRNG[i,j]==1){
-#       lines(c(data[i,1],data[j,1]),c(data[i,2],data[j,2]),col="blue")
-#       }
-#   }
-# }
+kRNG = algo$kRNG 
 
-res = spectral.clustering(kRNG, normalised = TRUE, score = FALSE, K = 2, adj = FALSE)
+for(i in 1:(n_data-1)){
+  for(j in (i+1):n_data){
+    if(kRNG[i,j]==1){
+      lines(c(data[i,1],data[j,1]),c(data[i,2],data[j,2]),col="blue")
+      }
+  }
+}
+
+res = algo$res
 
 par(mfrow=c(1,2))
 
