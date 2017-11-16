@@ -156,3 +156,92 @@ k_RNG_clustering_weighted <- function(S,k,l,n_data,sigma){
   return(list(res=res,kRNG=W))
 }
 
+
+############################## Clustering with true k-RNG
+
+# true_kRNG_clustering <- function(L,k,l) {
+#   n = dim(L)[1]
+#   count = 0
+#   kRNG = matrix(NA,nrow=n,ncol=n)
+# 
+#   for(i in 1:n){
+#     for (j in 1:n){
+#       for(m in 1:n){
+#         if(i!=j & i!=m & j!=m & L[i,j]>max(L[i,m],L[j,m])){
+#           count = count+1
+#         }
+#       }
+#       if(count<k & i!=j){
+#         kRNG[i,j] = 1
+#         count = 0
+#       }
+#       if(count>=k & i!=j){
+#         kRNG[i,j] = 0
+#         count = 0
+#       }
+#       if(i==j){
+#         kRNG[i,j] = 0
+#       }
+#     }
+#   }
+#   res = spectral.clustering(kRNG, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   return(list(res=res,kRNG=kRNG))
+# }
+
+true_kRNG_clustering_unweighted <- function(L,k,l) {
+  n = dim(L)[1]
+  count = 0
+  kRNG = matrix(NA,nrow=n,ncol=n)
+  
+  for(i in 1:n){
+    for (j in 1:n){
+      if(i!=j & length(which((L[i,j]>pmax(L[i,-c(i,j)],L[j,-c(i,j)]))==TRUE))<k){
+        kRNG[i,j] = 1
+      }
+      else{
+        kRNG[i,j] = 0
+      }
+    }
+  }
+  res = spectral.clustering(kRNG, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  return(list(res=res,kRNG=kRNG))
+}
+
+true_kRNG_clustering_weighted <- function(L,k,l,sigma) {
+  n = dim(L)[1]
+  count = 0
+  kRNG = matrix(NA,nrow=n,ncol=n)
+  
+  for(i in 1:n){
+    for (j in 1:n){
+      N = length(which((L[i,j]>pmax(L[i,-c(i,j)],L[j,-c(i,j)]))==TRUE))
+      if(i!=j & N<k){
+        kRNG[i,j] = exp(-N^2/((n-2)^2*sigma^2))
+      }
+      else{
+        kRNG[i,j] = 0
+      }
+    }
+  }
+  res = spectral.clustering(kRNG, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  return(list(res=res,kRNG=kRNG))
+}
+
+make.kRNG <- function(L,k,sigma){
+  n = dim(L)[1]
+  count = 0
+  kRNG = matrix(NA,nrow=n,ncol=n)
+  
+  for(i in 1:n){
+    for (j in 1:n){
+      N = length(which((L[i,j]>pmax(L[i,-c(i,j)],L[j,-c(i,j)]))==TRUE))
+      if(i!=j & N<k){
+        kRNG[i,j] = exp(-N^2/((n-2)^2*sigma^2))
+      }
+      else{
+        kRNG[i,j] = 0
+      }
+    }
+  }
+  return(kRNG)
+}

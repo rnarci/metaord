@@ -2,6 +2,8 @@ rm(list=objects())
 
 library(fcd)
 library(loe)
+library(clues)
+library(cccd)
 
 jaccard_abundance = read.table(file="mat_abundance_jaccard.csv",sep=",")
 ab_jaccard_abundance = read.table(file="mat_abundance_ab-jaccard.csv",sep=",")
@@ -32,47 +34,63 @@ ochiai_prevalence = as.matrix(ochiai_prevalence)
 whittaker_prevalence = as.matrix(whittaker_prevalence)
 simka_jaccard_prevalence = as.matrix(simka_jaccard_prevalence)
 
-k = 6
-l = 3
+k = 40
+l = 4
 
-# (k,l) = (30,2), (6,3), (40,4)
+# (k,l) = (30,2), (6,3), (40,4), (40,5)
 
-kNN1 = make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+kNN1 = make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = TRUE)
+
+kNN2 = make.kNNG(ab_jaccard_abundance, k = k, symm = TRUE, weight = TRUE)
+
+kNN3 = make.kNNG(braycurtis_abundance, k = k, symm = TRUE, weight = TRUE)
+
+kNN4 = make.kNNG(ab_ochiai_abundance, k = k, symm = TRUE, weight = TRUE)
+
+kNN5 = make.kNNG(ab_sorensen_abundance, k = k, symm = TRUE, weight = TRUE)
+
+kNN6 = make.kNNG(simka_jaccard_abundance, k = k, symm = TRUE, weight = TRUE)
+
+kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = TRUE)
+
+kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = TRUE)
+
+kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = TRUE)
+
+kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = TRUE)
+
+kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = TRUE)
+
+kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = TRUE)
+
+index_one_vs_one = rep(0,20)
+index_one_vs_all = rep(0,20)
+
+for(nb_run in 1:20)
+{
 res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN2 = make.kNNG(ab_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
 res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN3 = make.kNNG(braycurtis_abundance, k = k, symm = TRUE, weight = FALSE)
 res3 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN4 = make.kNNG(ab_ochiai_abundance, k = k, symm = TRUE, weight = FALSE)
 res4 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN5 = make.kNNG(ab_sorensen_abundance, k = k, symm = TRUE, weight = FALSE)
 res5 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN6 = make.kNNG(simka_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
 res6 = spectral.clustering(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = FALSE)
 res7 = spectral.clustering(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
 res8 = spectral.clustering(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
 res9 = spectral.clustering(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
 res10 = spectral.clustering(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = FALSE)
 res11 = spectral.clustering(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
-kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
 res12 = spectral.clustering(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-
 
 
 cluster = matrix(NA,nrow=210,ncol=12*l)
@@ -91,50 +109,20 @@ for(i in 1:l){
   cluster[1:length(which(res12==i)),i+11*l] = which(res12==i)
 }
 
+for(j in 1:11){
+  index_one_vs_all[nb_run] = index_one_vs_all[nb_run] + adjustedRand(get(paste("res",7,sep="")),get(paste("res",j+1,sep="")),randMethod="Rand")
+  for(m in (j+1):12){ 
+    index_one_vs_one[nb_run] = index_one_vs_one[nb_run] + adjustedRand(get(paste("res",j,sep="")),get(paste("res",m,sep="")),randMethod="Rand")
+  }
+}
+index_one_vs_one[nb_run] = index_one_vs_one[nb_run]/66 
+index_one_vs_all[nb_run] = index_one_vs_all[nb_run]/11 
+cat(sprintf("Itération %s \n",nb_run))
+}
+
+mean(index_one_vs_one)
+sd(index_one_vs_one)
+mean(index_one_vs_all)
+sd(index_one_vs_all)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-S = collect_all_statements_distance(jaccard_abundance)
-
-n_statements = 20000
-u = ceiling(runif(n_statements,0,dim(S)[1]))
-S_subset = S[u,]
-
-############################## Perform Algorithm 5 Clustering
-
-n_data = dim(jaccard_abundance)[1]
-k = 30
-l = 2
-sigma = 5
-
-algo = k_RNG_clustering_unweighted(S=S_subset,n_data=n_data,k=k,l=l)
-
-kRNG = algo$kRNG 
-res = algo$res

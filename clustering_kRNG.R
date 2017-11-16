@@ -91,4 +91,39 @@ if(data[1,1]==moons[1,1]){
 }
 
 
+############################## Clustering with true k-RNG
+
+n_data = half_n*2
+k = 2
+l = 2
+
+algo = true_kRNG_clustering_unweighted(L=L,k=k,l=l)
+
+kRNG = algo$kRNG 
+
+for(i in 1:(n_data-1)){
+  for(j in (i+1):n_data){
+    if(kRNG[i,j]==1){
+      lines(c(data[i,1],data[j,1]),c(data[i,2],data[j,2]),col="blue")
+    }
+  }
+}
+
+res = algo$res
+
+par(mfrow=c(1,2))
+
+if(data[1,1]==moons[1,1]){
+  plot(moons[1:half_n,1],moons[1:half_n,2],xlim=c(-1.5,2),ylim=c(-2.5,1.5),xlab="",ylab="",col="green")
+  points(moons[(half_n+1):(2*half_n),1],moons[(half_n+1):(2*half_n),2],col="red")
+  
+  plot(moons[which(res==1),1],moons[which(res==1),2],xlim=c(-1.5,2),ylim=c(-2.5,1.5),xlab="",ylab="",col="red")
+  points(moons[which(res==2),1],moons[which(res==2),2],col="green")
+}else{
+  plot(square[1:half_n,1],square[1:half_n,2],xlim=c(-1,4),ylim=c(-1,4),xlab="",ylab="",col="green")
+  points(square[(half_n+1):(2*half_n),1],square[(half_n+1):(2*half_n),2],col="red")
+  
+  plot(square[which(res==1),1],square[which(res==1),2],xlim=c(-1,4),ylim=c(-1,4),xlab="",ylab="",col="red")
+  points(square[which(res==2),1],square[which(res==2),2],col="green")
+}
 
