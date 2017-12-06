@@ -5,7 +5,7 @@ library(fcd)
 
 ############################## Create data set
 
-half_n = 50
+half_n = 104
 
 ########## 1) Two-moons data set
 

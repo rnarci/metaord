@@ -236,7 +236,7 @@ make.kRNG <- function(L,k,sigma){
     for (j in 1:n){
       N = length(which((L[i,j]>pmax(L[i,-c(i,j)],L[j,-c(i,j)]))==TRUE))
       if(i!=j & N<k){
-        kRNG[i,j] = exp(-N^2/((n-2)^2*sigma^2))
+        kRNG[i,j] = 1 #exp(-N^2/((n-2)^2*sigma^2))
       }
       else{
         kRNG[i,j] = 0
@@ -244,4 +244,95 @@ make.kRNG <- function(L,k,sigma){
     }
   }
   return(kRNG)
+}
+
+####################################################### Index to compare two adjacency matrices
+
+GRI <- function(G1,G2){
+  n = dim(G1)[1]
+  return(1-(norm(G1-G2,type="F")^2/(n*(n-1))))
+}
+
+Reciprocal <-
+  function(x){
+    
+    n = length(x)
+    temp = c()
+    for(i in 1: n){
+      if(x[i] == 0) temp[i] = 0
+      else temp[i] = 1/x[i]
+    }
+    return(temp)
+  }
+
+laplacian <-
+  function(A, normalised = FALSE){
+    
+    n = dim(A)[1]
+    temp = apply(abs(A), 2, sum)
+    D = diag(temp, nrow = n)
+    
+    # temp1 = Reciprocal(sqrt(temp))
+    temp1 = Reciprocal(temp)
+    inv.D = diag(temp1, nrow = n)
+    # half.D = diag(temp1, nrow = n)
+    # if(normalised == TRUE) 	return(solve(D) %*% (D - A))
+    if(normalised == TRUE) 	return(inv.D %*% (D - A))
+    if(normalised == FALSE) return(D - A)
+    
+  }
+
+spectral.clustering.rw <- function(A, normalised = TRUE, score = FALSE, K = 2, adj = FALSE){
+  
+  ### preparation 
+  n = dim(A)[1]
+  iso.A = isolate(A)
+  iso.seq = iso.A$isolate
+  noniso.seq = iso.A$nonisolate
+  A.noniso = A[noniso.seq, noniso.seq]
+  labels = rep(0, n)
+  
+  ### svd
+  n = dim(A.noniso)[1]
+  eig.A = eigen(A.noniso)
+  if(score == F){
+    U = matrix(0, nrow = n, ncol = K)	
+  }
+  if(score == T){
+    U = matrix(0, nrow = n, ncol = (K-1))
+  }
+  
+  ### get U matrix
+  if(adj == F & score == F){
+    L = laplacian(A = A.noniso, normalised = normalised)
+    eig = eigen(L, symmetric = TRUE)
+    
+    for(i in 1:K){
+      U[, i] = eig$vectors[, (n + 1 - i)]
+    }
+  }
+  
+  if(adj == T & score == F){
+    ordered.vec = eig.A$vectors[, order(abs(eig.A$values), decreasing = T)]
+    for(i in 1:K){
+      U[, i] = ordered.vec[, (n + 1 - i)]
+    }
+  }
+  
+  if(score == T){
+    ordered.vec = eig.A$vectors[, order(abs(eig.A$values), decreasing = T)]
+    benchmark = ordered.vec[,1] + 1e-5
+    for(i in 2:K){
+      U[, (i-1)] = eig.A$vectors[, order(abs(eig.A$values), decreasing = F)][, i]/benchmark
+    }
+  }
+  
+  ### k-means
+  #U = scale(U, center = F)
+  temp = unique(U, margin = 2)
+  if(dim(temp)[1] < K){stop('FAIL!')}
+  k.means = kmeans(U, centers = K)
+  labels[noniso.seq] = k.means$cluster
+  
+  return(labels)
 }
