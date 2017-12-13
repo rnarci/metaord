@@ -735,3 +735,412 @@ for(i in 1:n_data){
     }
 count_neighbors-k
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rm(list=objects())
+
+library(psych)
+
+Y = matrix(c(1,2,4,7,8,9,3,4,2,5,6,4,1,5,8,9,5,7,1,2),4,5)
+Y = scale(Y)
+Z=Y%*%t(Y)
+D = as.matrix(dist(Y,method="euclidean",diag=TRUE))
+
+A = -0.5*D^2
+
+Id = diag(identity(4))
+un = t(t(c(1,1,1,1)))
+scale = Id-(1/4)*un%*%t(un)
+
+G = scale%*%A%*%scale
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+########## Au cas ou
+
+
+# rm(list=objects())
+# 
+# library(fcd)
+# library(loe)
+# library(clues)
+# library(cccd)
+# library(fossil)
+# 
+# jaccard_abundance = read.table(file="mat_abundance_jaccard.csv",sep=",")
+# ab_jaccard_abundance = read.table(file="mat_abundance_ab-jaccard.csv",sep=",")
+# braycurtis_abundance = read.table(file="mat_abundance_braycurtis.csv",sep=",")
+# ab_ochiai_abundance = read.table(file="mat_abundance_ab-ochiai.csv",sep=",")
+# ab_sorensen_abundance = read.table(file="mat_abundance_ab-sorensen.csv",sep=",")
+# simka_jaccard_abundance = read.table(file="mat_abundance_simka-jaccard.csv",sep=",")
+# 
+# chord_prevalence = read.table(file="mat_presenceAbsence_chord.csv",sep=",")
+# jaccard_prevalence = read.table(file="mat_presenceAbsence_jaccard.csv",sep=",")
+# kulczynski_prevalence = read.table(file="mat_presenceAbsence_kulczynski.csv",sep=",")
+# ochiai_prevalence = read.table(file="mat_presenceAbsence_ochiai.csv",sep=",")
+# whittaker_prevalence = read.table(file="mat_presenceAbsence_whittaker.csv",sep=",")
+# simka_jaccard_prevalence = read.table(file="mat_presenceAbsence_simka-jaccard.csv",sep=",")
+# 
+# jaccard_abundance = as.matrix(jaccard_abundance[-67,-67])
+# ab_jaccard_abundance = as.matrix(ab_jaccard_abundance[-67,-67])
+# braycurtis_abundance = as.matrix(braycurtis_abundance[-67,-67])
+# ab_ochiai_abundance = as.matrix(ab_ochiai_abundance[-67,-67])
+# ab_sorensen_abundance = as.matrix(ab_sorensen_abundance[-67,-67])
+# simka_jaccard_abundance = as.matrix(simka_jaccard_abundance[-67,-67])
+# 
+# 
+# chord_prevalence = as.matrix(chord_prevalence[-67,-67])
+# jaccard_prevalence = as.matrix(jaccard_prevalence[-67,-67])
+# kulczynski_prevalence = as.matrix(kulczynski_prevalence[-67,-67])
+# ochiai_prevalence = as.matrix(ochiai_prevalence[-67,-67])
+# whittaker_prevalence = as.matrix(whittaker_prevalence[-67,-67])
+# simka_jaccard_prevalence = as.matrix(simka_jaccard_prevalence[-67,-67])
+# 
+# k = 35
+# l = 2
+# brouillon = matrix(0,6,6)
+# # (k,l) = (30,2), (6,3), (40,4), (40,5)
+# 
+# kNN1 = make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN2 = make.kNNG(ab_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN3 = make.kNNG(braycurtis_abundance, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN4 = make.kNNG(ab_ochiai_abundance, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN5 = make.kNNG(ab_sorensen_abundance, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN6 = make.kNNG(simka_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# index_one_vs_one = rep(0,100)
+# index_one_vs_all = rep(0,100)
+# 
+# for(nb_run in 1:100)
+# {
+#   res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res3 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res4 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res5 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res6 = spectral.clustering(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res7 = spectral.clustering(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res8 = spectral.clustering(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res9 = spectral.clustering(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res10 = spectral.clustering(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res11 = spectral.clustering(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   res12 = spectral.clustering(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+#   
+#   cluster = matrix(NA,nrow=210,ncol=12*l)
+#   for(i in 1:l){
+#     cluster[1:length(which(res1==i)),i] = which(res1==i)
+#     cluster[1:length(which(res2==i)),i+l] = which(res2==i)
+#     cluster[1:length(which(res3==i)),i+2*l] = which(res3==i)
+#     cluster[1:length(which(res4==i)),i+3*l] = which(res4==i)
+#     cluster[1:length(which(res5==i)),i+4*l] = which(res5==i)
+#     cluster[1:length(which(res6==i)),i+5*l] = which(res6==i)
+#     cluster[1:length(which(res7==i)),i+6*l] = which(res7==i)
+#     cluster[1:length(which(res8==i)),i+7*l] = which(res8==i)
+#     cluster[1:length(which(res9==i)),i+8*l] = which(res9==i)
+#     cluster[1:length(which(res10==i)),i+9*l] = which(res10==i)
+#     cluster[1:length(which(res11==i)),i+10*l] = which(res11==i)
+#     cluster[1:length(which(res12==i)),i+11*l] = which(res12==i)
+#   }
+#   
+#   for(j in 7:11){
+#     index_one_vs_all[nb_run] = index_one_vs_all[nb_run] + adjustedRand(get(paste("res",7,sep="")),get(paste("res",j+1,sep="")),randMethod="Rand")
+#     for(m in (j+1):12){ 
+#       index_one_vs_one[nb_run] = index_one_vs_one[nb_run] + adjustedRand(get(paste("res",j,sep="")),get(paste("res",m,sep="")),randMethod="Rand")
+#     }
+#   }
+#   
+#   for(j in 7:12){
+#     for(m in 7:12){ 
+#       brouillon[j-6,m-6] = brouillon[j-6,m-6] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))/100
+#     }
+#   }
+#   
+#   index_one_vs_one[nb_run] = index_one_vs_one[nb_run]/15
+#   index_one_vs_all[nb_run] = index_one_vs_all[nb_run]/5
+#   cat(sprintf("Itération %s \n",nb_run))
+# }
+# 
+# mean(index_one_vs_one)
+# sd(index_one_vs_one)
+# mean(index_one_vs_all)
+# sd(index_one_vs_all)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############################## Choose size fraction
+
+size_fraction = "0.8-5"
+
+if(size_fraction=="0.8-5"){
+  setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_0.8-5") 
+}
+
+if(size_fraction=="5-20"){
+  setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_5-20") 
+}
+
+if(size_fraction=="180-2000"){
+  setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_180-2000") 
+}
+
+if(size_fraction=="0.22-3"){
+  setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_0.22-3") 
+}
+
+if(size_fraction=="0-0.2"){
+  setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_0-0.2") 
+}
+
+if(size_fraction=="20-180"){
+  setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_20-180") 
+}
+
+############################## Import data (note : pour l'instant, je ne prends pas les matrices de distance asymetriques et celle de sorensen-braycurtis PA)
+
+if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
+  jaccard_abundance2 = read.table(file="mat_abundance_jaccard.csv",sep="")
+  if(dim(jaccard_abundance2)[2]==1){
+    jaccard_abundance2 = read.table(file="mat_abundance_jaccard.csv",sep=";")
+    sep = ";"
+  }else{
+    sep = ""
+  }
+  delete=c(which(duplicated(jaccard_abundance2)==TRUE)) # remove duplicates
+  jaccard_abundance = jaccard_abundance2[-delete,-delete]
+  sample = jaccard_abundance2[-1,1]
+  
+  jaccard_abundance2 = read.table(file="mat_abundance_jaccard.csv",sep=sep)
+  ab_jaccard_abundance2 = read.table(file="mat_abundance_ab-jaccard.csv",sep=sep)
+  braycurtis_abundance2 = read.table(file="mat_abundance_braycurtis.csv",sep=sep)
+  ab_ochiai_abundance2 = read.table(file="mat_abundance_ab-ochiai.csv",sep=sep)
+  ab_sorensen_abundance2 = read.table(file="mat_abundance_ab-sorensen.csv",sep=sep)
+  simka_jaccard_abundance2 = read.table(file="mat_abundance_simka-jaccard.csv",sep=sep)
+  
+  chord_prevalence2 = read.table(file="mat_presenceAbsence_chord.csv",sep=sep)
+  jaccard_prevalence2 = read.table(file="mat_presenceAbsence_jaccard.csv",sep=sep)
+  kulczynski_prevalence2 = read.table(file="mat_presenceAbsence_kulczynski.csv",sep=sep)
+  ochiai_prevalence2 = read.table(file="mat_presenceAbsence_ochiai.csv",sep=sep)
+  whittaker_prevalence2 = read.table(file="mat_presenceAbsence_whittaker.csv",sep=sep)
+  simka_jaccard_prevalence2 = read.table(file="mat_presenceAbsence_simka-jaccard.csv",sep=sep)
+  # sorensen_braycurtis_prevalence2 = read.table(file="mat_presenceAbsence_sorensen-braycurtis.csv",sep="") doesn't work
+  
+  ############### Distance matrices
+  
+  jaccard_abundance2 = unname(as.matrix(jaccard_abundance2)[c(-1,-delete),c(-1,-delete)])
+  ab_jaccard_abundance2 = unname(as.matrix(ab_jaccard_abundance2)[c(-1,-delete),c(-1,-delete)])
+  braycurtis_abundance2 = unname(as.matrix(braycurtis_abundance2)[c(-1,-delete),c(-1,-delete)])
+  ab_ochiai_abundance2 = unname(as.matrix(ab_ochiai_abundance2)[c(-1,-delete),c(-1,-delete)])
+  ab_sorensen_abundance2 = unname(as.matrix(ab_sorensen_abundance2)[c(-1,-delete),c(-1,-delete)])
+  simka_jaccard_abundance2 = unname(as.matrix(simka_jaccard_abundance2)[c(-1,-delete),c(-1,-delete)])
+  
+  
+  chord_prevalence2 = unname(as.matrix(chord_prevalence2)[c(-1,-delete),c(-1,-delete)])
+  jaccard_prevalence2 = unname(as.matrix(jaccard_prevalence2)[c(-1,-delete),c(-1,-delete)])
+  kulczynski_prevalence2 = unname(as.matrix(kulczynski_prevalence2)[c(-1,-delete),c(-1,-delete)])
+  ochiai_prevalence2 = unname(as.matrix(ochiai_prevalence2)[c(-1,-delete),c(-1,-delete)])
+  whittaker_prevalence2 = unname(as.matrix(whittaker_prevalence2)[c(-1,-delete),c(-1,-delete)])
+  simka_jaccard_prevalence2 = unname(as.matrix(simka_jaccard_prevalence2)[c(-1,-delete),c(-1,-delete)])
+  # sorensen_braycurtis_prevalence2 = unname(as.matrix(sorensen_braycurtis_prevalence2)[c(-1,-delete),c(-1,-delete)])
+  
+  n = dim(jaccard_abundance2)[1]
+  
+  jaccard_abundance = matrix(NA,nrow=n,ncol=n)
+  ab_jaccard_abundance = matrix(NA,nrow=n,ncol=n)
+  braycurtis_abundance = matrix(NA,nrow=n,ncol=n)
+  ab_ochiai_abundance = matrix(NA,nrow=n,ncol=n)
+  ab_sorensen_abundance = matrix(NA,nrow=n,ncol=n)
+  simka_jaccard_abundance = matrix(NA,nrow=n,ncol=n)
+  
+  chord_prevalence = matrix(NA,nrow=n,ncol=n)
+  jaccard_prevalence = matrix(NA,nrow=n,ncol=n)
+  kulczynski_prevalence = matrix(NA,nrow=n,ncol=n)
+  ochiai_prevalence = matrix(NA,nrow=n,ncol=n)
+  whittaker_prevalence = matrix(NA,nrow=n,ncol=n)
+  simka_jaccard_prevalence = matrix(NA,nrow=n,ncol=n)
+  # sorensen_braycurtis_prevalence = matrix(NA,nrow=n,ncol=n)
+  
+  for(j in 1:n){
+    jaccard_abundance[,j] = as.numeric(jaccard_abundance2[,j])
+    ab_jaccard_abundance[,j] = as.numeric(ab_jaccard_abundance2[,j])
+    braycurtis_abundance[,j] = as.numeric(braycurtis_abundance2[,j])
+    ab_ochiai_abundance[,j] = as.numeric(ab_ochiai_abundance2[,j])
+    ab_sorensen_abundance[,j] = as.numeric(ab_sorensen_abundance2[,j])
+    simka_jaccard_abundance[,j] = as.numeric(simka_jaccard_abundance2[,j])
+    
+    chord_prevalence[,j] = as.numeric(chord_prevalence2[,j])
+    jaccard_prevalence[,j] = as.numeric(jaccard_prevalence2[,j])
+    kulczynski_prevalence[,j] = as.numeric(kulczynski_prevalence2[,j])
+    ochiai_prevalence[,j] = as.numeric(ochiai_prevalence2[,j])
+    whittaker_prevalence[,j] = as.numeric(whittaker_prevalence2[,j])
+    simka_jaccard_prevalence[,j] = as.numeric(simka_jaccard_prevalence2[,j])
+    # sorensen_braycurtis_prevalence[,j] = as.numeric(sorensen_braycurtis_prevalence2[,j])
+  }
+  
+}else{
+  sep = ""
+  jaccard_abundance = read.table(file="mat_abundance_jaccard.csv",sep=sep)
+  ochiai_abundance = read.table(file="mat_abundance_ochiai.csv",sep=sep)
+  sorensen_abundance = read.table(file="mat_abundance_sorensen.csv",sep=sep)
+  simka_jaccard_abundance = read.table(file="mat_abundance_simka-jaccard.csv",sep=sep)
+  
+  chord_hellinger_prevalence = read.table(file="mat_presenceAbsence_chord-hellinger.csv",sep=sep)
+  jaccard_canberra_prevalence = read.table(file="mat_presenceAbsence_jaccard-canberra.csv",sep=sep)
+  kulczynski_prevalence = read.table(file="mat_presenceAbsence_kulczynski.csv",sep=sep)
+  ochiai_prevalence = read.table(file="mat_presenceAbsence_ochiai.csv",sep=sep)
+  whittaker_prevalence = read.table(file="mat_presenceAbsence_whittaker.csv",sep=sep)
+  simka_jaccard_prevalence = read.table(file="mat_presenceAbsence_simka-jaccard.csv",sep=sep)
+  sorensen_braycurtis_prevalence = read.table(file="mat_presenceAbsence_sorensen-braycurtis.csv",sep=sep)
+  
+  ############### Distance matrices
+  
+  jaccard_abundance = unname(as.matrix(jaccard_abundance))
+  ochiai_abundance = unname(as.matrix(ochiai_abundance))
+  sorensen_abundance = unname(as.matrix(sorensen_abundance))
+  simka_jaccard_abundance = unname(as.matrix(simka_jaccard_abundance))
+  
+  
+  chord_hellinger_prevalence = unname(as.matrix(chord_hellinger_prevalence))
+  jaccard_canberra_prevalence = unname(as.matrix(jaccard_canberra_prevalence))
+  kulczynski_prevalence = unname(as.matrix(kulczynski_prevalence))
+  ochiai_prevalence = unname(as.matrix(ochiai_prevalence))
+  whittaker_prevalence = unname(as.matrix(whittaker_prevalence))
+  simka_jaccard_prevalence = unname(as.matrix(simka_jaccard_prevalence))
+  sorensen_braycurtis_prevalence = unname(as.matrix(sorensen_braycurtis_prevalence))
+}
+
