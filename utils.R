@@ -1,4 +1,6 @@
-import_data <- function(size_fraction){
+import_data <- function(size_fraction, samples = NULL){
+oldwd <- getwd()  
+  
 if(size_fraction=="0.8-5"){
   setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_0.8-5") 
 }
@@ -23,7 +25,9 @@ if(size_fraction=="20-180"){
   setwd(dir="/home/rnarci/Bureau/CDDrnarci/Donnees/simka_matrices_17-05-22/Simka_20-180") 
 }
 
-############################## Import data (note : pour l'instant, je ne prends pas les matrices de distance asymetriques et celle de sorensen-braycurtis PA)
+############################################################ Import data (note : pour l'instant, je ne prends pas les 
+############################################################ matrices de distance asymetriques et celle de 
+############################################################ sorensen-braycurtis PA)
 
 if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
   jaccard_abundance2 = read.table(file="mat_abundance_jaccard.csv",sep="")
@@ -35,7 +39,7 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
   }
   delete=c(which(duplicated(jaccard_abundance2)==TRUE)) # remove duplicates
   jaccard_abundance2 = jaccard_abundance2[-delete,-delete]
-  metagenomic_sample <<- jaccard_abundance2[-1,1]
+  metagenomic_sample <<- as.character(jaccard_abundance2[-1,1])
   
   jaccard_abundance2 = read.table(file="mat_abundance_jaccard.csv",sep=sep)
   ab_jaccard_abundance2 = read.table(file="mat_abundance_ab-jaccard.csv",sep=sep)
@@ -52,7 +56,7 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
   simka_jaccard_prevalence2 = read.table(file="mat_presenceAbsence_simka-jaccard.csv",sep=sep)
   # sorensen_braycurtis_prevalence2 = read.table(file="mat_presenceAbsence_sorensen-braycurtis.csv",sep="") doesn't work
   
-  ############### Distance matrices
+  ############################################################ Distance matrices
   
   jaccard_abundance2 = unname(as.matrix(jaccard_abundance2)[c(-1,-delete),c(-1,-delete)])
   ab_jaccard_abundance2 = unname(as.matrix(ab_jaccard_abundance2)[c(-1,-delete),c(-1,-delete)])
@@ -104,6 +108,29 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
     # sorensen_braycurtis_prevalence[,j] = as.numeric(sorensen_braycurtis_prevalence2[,j])
   }
   
+  ############################################################ Name rows and columns correctly
+  
+  matrices.list <- c("jaccard_abundance", "ab_jaccard_abundance", "braycurtis_abundance", 
+                     "ab_ochiai_abundance", "ab_sorensen_abundance", "simka_jaccard_abundance", 
+                     "chord_prevalence", "jaccard_prevalence", "kulczynski_prevalence", 
+                     "ochiai_prevalence", "whittaker_prevalence", "simka_jaccard_prevalence")
+  for (mat in matrices.list) {
+    dist.mat <- get(mat)
+    rownames(dist.mat) <- colnames(dist.mat) <- metagenomic_sample
+    if (!is.null(samples)) {
+      complete_sample <- intersect(metagenomic_sample, samples)
+      dist.mat <- dist.mat[complete_sample, complete_sample]
+    }
+    assign(x = mat, value = dist.mat, envir = .GlobalEnv)
+  }
+  
+  if (!is.null(samples)) {
+    metagenomic_sample <<- complete_sample
+    if (length(metagenomic_sample) == 0) {
+      warning("No sample selected, check the value of `samples` argument")
+    }
+  }
+  
 }else{
   sep = ""
   jaccard_abundance = read.table(file="mat_abundance_jaccard.csv",sep=sep)
@@ -119,7 +146,9 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
   simka_jaccard_prevalence = read.table(file="mat_presenceAbsence_simka-jaccard.csv",sep=sep)
   sorensen_braycurtis_prevalence = read.table(file="mat_presenceAbsence_sorensen-braycurtis.csv",sep=sep)
   
-  ############### Distance matrices
+  metagenomic_sample <<- row.names(jaccard_abundance)
+  
+  ############################################################ Distance matrices
   
   jaccard_abundance <<- unname(as.matrix(jaccard_abundance))
   ochiai_abundance <<- unname(as.matrix(ochiai_abundance))
@@ -134,7 +163,37 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
   whittaker_prevalence <<- unname(as.matrix(whittaker_prevalence))
   simka_jaccard_prevalence <<- unname(as.matrix(simka_jaccard_prevalence))
   sorensen_braycurtis_prevalence <<- unname(as.matrix(sorensen_braycurtis_prevalence))
+  
+  ############################################################ Name rows and columns correctly
+  
+  matrices.list <- c("jaccard_abundance", "ochiai_abundance", "sorensen_abundance", 
+                      "simka_jaccard_abundance", "chord_hellinger_prevalence", 
+                     "jaccard_canberra_prevalence", "kulczynski_prevalence", 
+                     "ochiai_prevalence", "whittaker_prevalence", "simka_jaccard_prevalence",
+                     "sorensen_braycurtis_prevalence")
+  
+  for (mat in matrices.list) {
+    dist.mat <- get(mat)
+    rownames(dist.mat) <- colnames(dist.mat) <- metagenomic_sample
+    if (!is.null(samples)) {
+      complete_sample <- intersect(metagenomic_sample, samples)
+      dist.mat <- dist.mat[complete_sample, complete_sample]
+    }
+    assign(x = mat, value = dist.mat, envir = .GlobalEnv)
+  }
+  
+  if (!is.null(samples)) {
+    metagenomic_sample <<- complete_sample
+    if (length(metagenomic_sample) == 0) {
+      warning("No sample selected, check the value of `samples` argument")
+    }
+  }
 }
+
+############################################################ Restore working directory
+
+setwd(oldwd)
+
 }
 
 
