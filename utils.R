@@ -133,36 +133,67 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
   
 }else{
   sep = ""
-  jaccard_abundance = read.table(file="mat_abundance_jaccard.csv",sep=sep)
-  ochiai_abundance = read.table(file="mat_abundance_ochiai.csv",sep=sep)
-  sorensen_abundance = read.table(file="mat_abundance_sorensen.csv",sep=sep)
-  simka_jaccard_abundance = read.table(file="mat_abundance_simka-jaccard.csv",sep=sep)
+  jaccard_abundance2 = read.table(file="mat_abundance_jaccard.csv",sep=sep)
+  ochiai_abundance2 = read.table(file="mat_abundance_ochiai.csv",sep=sep)
+  sorensen_abundance2 = read.table(file="mat_abundance_sorensen.csv",sep=sep)
+  simka_jaccard_abundance2 = read.table(file="mat_abundance_simka-jaccard.csv",sep=sep)
   
-  chord_hellinger_prevalence = read.table(file="mat_presenceAbsence_chord-hellinger.csv",sep=sep)
-  jaccard_canberra_prevalence = read.table(file="mat_presenceAbsence_jaccard-canberra.csv",sep=sep)
-  kulczynski_prevalence = read.table(file="mat_presenceAbsence_kulczynski.csv",sep=sep)
-  ochiai_prevalence = read.table(file="mat_presenceAbsence_ochiai.csv",sep=sep)
-  whittaker_prevalence = read.table(file="mat_presenceAbsence_whittaker.csv",sep=sep)
-  simka_jaccard_prevalence = read.table(file="mat_presenceAbsence_simka-jaccard.csv",sep=sep)
-  sorensen_braycurtis_prevalence = read.table(file="mat_presenceAbsence_sorensen-braycurtis.csv",sep=sep)
+  chord_hellinger_prevalence2 = read.table(file="mat_presenceAbsence_chord-hellinger.csv",sep=sep)
+  jaccard_canberra_prevalence2 = read.table(file="mat_presenceAbsence_jaccard-canberra.csv",sep=sep)
+  kulczynski_prevalence2 = read.table(file="mat_presenceAbsence_kulczynski.csv",sep=sep)
+  ochiai_prevalence2 = read.table(file="mat_presenceAbsence_ochiai.csv",sep=sep)
+  whittaker_prevalence2 = read.table(file="mat_presenceAbsence_whittaker.csv",sep=sep)
+  simka_jaccard_prevalence2 = read.table(file="mat_presenceAbsence_simka-jaccard.csv",sep=sep)
+  sorensen_braycurtis_prevalence2 = read.table(file="mat_presenceAbsence_sorensen-braycurtis.csv",sep=sep)
   
-  metagenomic_sample <<- row.names(jaccard_abundance)
+  metagenomic_sample <<- row.names(jaccard_abundance2)
   
   ############################################################ Distance matrices
   
-  jaccard_abundance <<- unname(as.matrix(jaccard_abundance))
-  ochiai_abundance <<- unname(as.matrix(ochiai_abundance))
-  sorensen_abundance <<- unname(as.matrix(sorensen_abundance))
-  simka_jaccard_abundance <<- unname(as.matrix(simka_jaccard_abundance))
+  jaccard_abundance2 = unname(as.matrix(jaccard_abundance2))
+  ochiai_abundance2 = unname(as.matrix(ochiai_abundance2))
+  sorensen_abundance2 = unname(as.matrix(sorensen_abundance2))
+  simka_jaccard_abundance2 = unname(as.matrix(simka_jaccard_abundance2))
   
   
-  chord_hellinger_prevalence <<- unname(as.matrix(chord_hellinger_prevalence))
-  jaccard_canberra_prevalence <<- unname(as.matrix(jaccard_canberra_prevalence))
-  kulczynski_prevalence <<- unname(as.matrix(kulczynski_prevalence))
-  ochiai_prevalence <<- unname(as.matrix(ochiai_prevalence))
-  whittaker_prevalence <<- unname(as.matrix(whittaker_prevalence))
-  simka_jaccard_prevalence <<- unname(as.matrix(simka_jaccard_prevalence))
-  sorensen_braycurtis_prevalence <<- unname(as.matrix(sorensen_braycurtis_prevalence))
+  chord_hellinger_prevalence2 = unname(as.matrix(chord_hellinger_prevalence2))
+  jaccard_canberra_prevalence2 = unname(as.matrix(jaccard_canberra_prevalence2))
+  kulczynski_prevalence2 = unname(as.matrix(kulczynski_prevalence2))
+  ochiai_prevalence2 = unname(as.matrix(ochiai_prevalence2))
+  whittaker_prevalence2 = unname(as.matrix(whittaker_prevalence2))
+  simka_jaccard_prevalence2 = unname(as.matrix(simka_jaccard_prevalence2))
+  sorensen_braycurtis_prevalence2 = unname(as.matrix(sorensen_braycurtis_prevalence2))
+  
+  n = dim(jaccard_abundance2)[1]
+  
+  jaccard_abundance <<- matrix(NA,nrow=n,ncol=n)
+  ochiai_abundance <<- matrix(NA,nrow=n,ncol=n)
+  sorensen_abundance <<- matrix(NA,nrow=n,ncol=n)
+  simka_jaccard_abundance <<- matrix(NA,nrow=n,ncol=n)
+  
+  
+  chord_hellinger_prevalence <<- matrix(NA,nrow=n,ncol=n)
+  jaccard_canberra_prevalence <<- matrix(NA,nrow=n,ncol=n)
+  kulczynski_prevalence <<- matrix(NA,nrow=n,ncol=n)
+  ochiai_prevalence <<- matrix(NA,nrow=n,ncol=n)
+  whittaker_prevalence <<- matrix(NA,nrow=n,ncol=n)
+  simka_jaccard_prevalence <<- matrix(NA,nrow=n,ncol=n)
+  sorensen_braycurtis_prevalence <<- matrix(NA,nrow=n,ncol=n)
+  
+  for(j in 1:n){
+    jaccard_abundance[,j] <<- as.numeric(jaccard_abundance2[,j])
+    ochiai_abundance[,j] <<- as.numeric(ochiai_abundance2[,j])
+    sorensen_abundance[,j] <<- as.numeric(sorensen_abundance2[,j])
+    simka_jaccard_abundance[,j] <<- as.numeric(simka_jaccard_abundance2[,j])
+    
+    chord_hellinger_prevalence[,j] <<- as.numeric(chord_hellinger_prevalence2[,j])
+    jaccard_canberra_prevalence[,j] <<- as.numeric(jaccard_canberra_prevalence2[,j])
+    kulczynski_prevalence[,j] <<- as.numeric(kulczynski_prevalence2[,j])
+    ochiai_prevalence[,j] <<- as.numeric(ochiai_prevalence2[,j])
+    whittaker_prevalence[,j] <<- as.numeric(whittaker_prevalence2[,j])
+    simka_jaccard_prevalence[,j] <<- as.numeric(simka_jaccard_prevalence2[,j])
+    sorensen_braycurtis_prevalence[,j] = as.numeric(sorensen_braycurtis_prevalence2[,j])
+  }
   
   ############################################################ Name rows and columns correctly
   

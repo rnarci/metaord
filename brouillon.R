@@ -1188,3 +1188,338 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
 # 
 # # impute(design)
 # complete(mice(design,method="norm.predict",m=1))$Phosphates
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rm(list=objects())
+
+Y = matrix(c(1,2,4,7,8,9,3,4,2,5,6,4,1,5,8,9,5,7,1,2),4,5)
+Y = scale(Y)
+
+X = matrix(c(4,5,3,1,7,8,4,9,1,2,5,6),4,3)
+H = X%*%solve(t(X)%*%X)%*%t(X)
+
+# Essai 1
+
+v1 = sum(((H%*%Y)[1,])^2)
+
+D = as.matrix(dist(Y,method="euclidean",diag=TRUE))
+A = -0.5*D^2
+Id = diag(identity(4))
+un = t(t(c(1,1,1,1)))
+scale = Id-(1/4)*un%*%t(un)
+G = scale%*%A%*%scale
+v2 = H[1,]%*%G%*%H[,1]
+
+# Essai 2 
+
+Y_hat = H%*%Y 
+D1 = matrix(NA,4,4)
+
+for(i in 1:4){
+  for(j in 1:4){
+    D1[i,j] = sum((Y_hat[i,]-Y_hat[j,])^2)    
+  }
+}
+
+D2 = matrix(NA,4,4)
+
+for(i in 1:4){
+  for(j in 1:4){
+    D2[i,j] = H[i,]%*%G%*%H[,i] + H[j,]%*%G%*%H[,j] - 2*H[i,]%*%G%*%H[,j]
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####### Fake data
+
+
+fake.data <- data.frame(clus.raw = rep(1:2, each = 5),
+                        clus.corrected = rep(1:2, times = 5)) %>% 
+  mutate(Temperature = 10 * clus.raw + rnorm(10))
+head(fake.data)
+
+fdata <- gather(fake.data, key = "Clustering", value = "Group", clus.raw:clus.corrected)
+head(fdata)
+
+## Temperature against clusters for clusters computed on raw distances
+ggplot(fake.data, aes(x = clus.raw, y = Temperature)) + geom_point()
+## Temperature against clusters for clusters computed on corrected distances
+ggplot(fake.data, aes(x = clus.corrected, y = Temperature)) + geom_point()
+
+ggplot(fdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ---
+#   title: "22_01_2018"
+# output: html_document
+# ---
+#   
+#   ```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = TRUE)
+# ```
+# 
+# ```{r,echo=FALSE, message=FALSE, warning=FALSE}
+# rm(list=objects())
+# 
+# library(vegan)
+# 
+# ############################################################ Source custom scripts
+# 
+# source('~/metaord/utils.R')
+# 
+# ############################################################ Design
+# 
+# data.wd <- "/home/rnarci/Bureau/CDDrnarci/Donnees/"
+# design = read.table(file=file.path(data.wd, "param_bioadvection.csv"),sep="",header=TRUE)
+# rownames(design) <- design$Sample
+# 
+# ############################################################ Import data
+# 
+# size_fraction = "0.8-5"
+# import_data(size_fraction, samples = rownames(design))
+# 
+# ############################################################ Subset design
+# 
+# design <- design[metagenomic_sample, ]
+# design <- design[,-c(1,6,7)]
+# ```
+# 
+# # Clustering de taille 2
+# 
+# ```{r,echo=FALSE, message=FALSE, eval=TRUE}
+# D_MDS1 = matrix(NA,dim(jaccard_abundance)[1],dim(jaccard_abundance)[1])
+# D_MDS2 = matrix(NA,dim(jaccard_abundance)[1],dim(jaccard_abundance)[1])
+# 
+# mod1 = capscale(as.dist(jaccard_abundance) ~ Temperature + SSD + SI_temperature + Depth + Silicate + SI_nitrates + Temperature:SI_nitrates + Temperature:SSD, data = design)
+# mod2 = capscale(as.dist(jaccard_abundance) ~ Temperature, data = design)
+# Y_tilde1 = as.matrix(mod1$CCA$u)
+# Y_tilde1 = scale(Y_tilde1)
+# Y_tilde2 = as.matrix(mod2$CCA$u)
+# Y_tilde2 = scale(Y_tilde2)
+# 
+# parms = c(design$Temperature,design$SSD,design$SI_temperature,design$Depth,design$Silicate,design$SI_nitrates)
+# X1 = matrix(parms,nrow=dim(jaccard_abundance)[1],ncol=6)
+# X2 = design$Temperature
+# H1 = X1%*%solve(t(X1)%*%X1)%*%t(X1)
+# H2 = X2%*%solve(t(X2)%*%X2)%*%t(X2)
+# 
+# Y_hat1 = H1%*%Y_tilde1 
+# Y_hat2 = H2%*%Y_tilde2 
+# 
+# for(i in 1:dim(jaccard_abundance)[1]){
+#   for(j in 1:dim(jaccard_abundance)[1]){
+#     D_MDS1[i,j] = sqrt(sum((Y_hat1[i,] - Y_hat1[j,])^2)) 
+#     D_MDS2[i,j] = sqrt(sum((Y_hat2[i,] - Y_hat2[j,])^2)) 
+#   }
+# }
+# 
+# ## Sans MDS
+# 
+# D_without_MDS1 = matrix(NA,dim(jaccard_abundance)[1],dim(jaccard_abundance)[1])
+# D_without_MDS2 = matrix(NA,dim(jaccard_abundance)[1],dim(jaccard_abundance)[1])
+# 
+# A = -0.5*jaccard_abundance^2
+# Id = diag(identity(dim(jaccard_abundance)[1]))
+# un = t(t(rep(1,dim(jaccard_abundance)[1])))
+# scale = Id-(1/dim(jaccard_abundance)[1])*un%*%t(un)
+# 
+# G = scale%*%A%*%scale
+# 
+# for(i in 1:dim(jaccard_abundance)[1]){
+#   for(j in 1:dim(jaccard_abundance)[1]){
+#     D_without_MDS1[i,j] = sqrt(H1[i,]%*%G%*%H1[,i] + H1[j,]%*%G%*%H1[,j] - 2*H1[i,]%*%G%*%H1[,j])
+#     D_without_MDS2[i,j] = sqrt(H2[i,]%*%G%*%H2[,i] + H2[j,]%*%G%*%H2[,j] - 2*H2[i,]%*%G%*%H2[,j])
+#   }
+# }
+# 
+# ####### Pre-requis pour clustering par k-means
+# 
+# fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=2)
+# fit2 = cmdscale(D_MDS1, eig=TRUE, k=2)
+# fit3 = cmdscale(D_without_MDS1, eig=TRUE, k=2)
+# fit4 = cmdscale(D_MDS2, eig=TRUE, k=2)
+# fit5 = cmdscale(D_without_MDS2, eig=TRUE, k=2)
+# 
+# ####### Pre-requis pour clustering ordinal
+# 
+# library(loe)
+# library(fcd)
+# library(clues)
+# 
+# kNN1 = make.kNNG(jaccard_abundance, k = 35, symm = TRUE, weight = FALSE)
+# kNN2 = make.kNNG(D_MDS1, k = 35, symm = TRUE, weight = FALSE)
+# kNN3 = make.kNNG(D_without_MDS1, k = 35, symm = TRUE, weight = FALSE)
+# kNN4 = make.kNNG(D_MDS2, k = 35, symm = TRUE, weight = FALSE)
+# kNN5 = make.kNNG(D_without_MDS2, k = 35, symm = TRUE, weight = FALSE)
+# 
+# ####### Clustering de l clusters
+# 
+# l = 2
+# 
+# res1 = kmeans(fit1$points,l)$cluster
+# res2 = kmeans(fit2$points,l)$cluster
+# res3 = kmeans(fit3$points,l)$cluster
+# res4 = kmeans(fit4$points,l)$cluster
+# res5 = kmeans(fit5$points,l)$cluster
+# 
+# res6 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res7 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res8 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res9 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res10 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# ####### Comparaison des clusterings
+# 
+# tab = matrix(NA,10,10)
+# 
+# for(i in 1:10){
+#   for(j in 1:10){
+#     tab[i,j] = adjustedRand(get(paste("res",i,sep="")),get(paste("res",j,sep="")),randMethod="Rand") 
+#   }
+# }
+# round(tab,2)
+# ```
+# 
+# # Clustering de taille 3
+# 
+# ```{r,echo=FALSE, message=FALSE, eval=TRUE}
+# l = 3
+# 
+# res1 = kmeans(fit1$points,l)$cluster
+# res2 = kmeans(fit2$points,l)$cluster
+# res3 = kmeans(fit3$points,l)$cluster
+# res4 = kmeans(fit4$points,l)$cluster
+# res5 = kmeans(fit5$points,l)$cluster
+# 
+# res6 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res7 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res8 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res9 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res10 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# ####### Comparaison des clusterings
+# 
+# tab = matrix(NA,10,10)
+# 
+# for(i in 1:10){
+#   for(j in 1:10){
+#     tab[i,j] = adjustedRand(get(paste("res",i,sep="")),get(paste("res",j,sep="")),randMethod="Rand") 
+#   }
+# }
+# round(tab,2)
+# ```
+# 
+# # Clustering de taille 4
+# 
+# ```{r,echo=FALSE, message=FALSE, eval=TRUE}
+# l = 4
+# 
+# res1 = kmeans(fit1$points,l)$cluster
+# res2 = kmeans(fit2$points,l)$cluster
+# res3 = kmeans(fit3$points,l)$cluster
+# res4 = kmeans(fit4$points,l)$cluster
+# res5 = kmeans(fit5$points,l)$cluster
+# 
+# res6 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res7 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res8 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res9 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# res10 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# ####### Comparaison des clusterings
+# 
+# tab = matrix(NA,10,10)
+# 
+# for(i in 1:10){
+#   for(j in 1:10){
+#     tab[i,j] = adjustedRand(get(paste("res",i,sep="")),get(paste("res",j,sep="")),randMethod="Rand") 
+#   }
+# }
+# round(tab,2)
+# ```
+# 
+# ```{r}
+# datatable(results) %>% formatRound(columns = 1:7, digits = 3)
+# ```
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
