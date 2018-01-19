@@ -1144,3 +1144,47 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
   sorensen_braycurtis_prevalence = unname(as.matrix(sorensen_braycurtis_prevalence))
 }
 
+
+
+# ## Imputation de donnees manquantes
+# 
+# ## Methode 1 :
+# summary(design)
+# symnum(cor(design, use = "complete.obs"))
+# 
+# missDummy <- function(t)
+# {
+#   x <- dim(length(t)) 
+#   x[which(!is.na(t))] = 1
+#   x[which(is.na(t))] = 0
+#   return(x)
+# }
+# 
+# #Now we will use this function to create a dummy variable that will indicate missing value using 0, otherwise willtake the value 1.
+# 
+# design_bis = design
+# design_bis$dummy <- missDummy(design$Phosphates)
+# 
+# #Let us take a look at the data
+# design_bis
+# 
+# lm(Phosphates ~ Silicate, design)
+# 
+# for(i in 1:nrow(design))
+# {
+#   if(design_bis$dummy[i] == 0)
+#   {
+#     # design$Phosphates[i] = -1.184303 + 0.009963*design$Silicate[i] + 0.002018*design$SSD[i]
+#     design$Phosphates[i] = 0.23558 + 0.02207*design$Silicate[i]
+#   }
+# }
+# 
+# design$Phosphates
+# 
+# ## Methode 2 :
+# 
+# # library(imputeR)
+# library(mice)
+# 
+# # impute(design)
+# complete(mice(design,method="norm.predict",m=1))$Phosphates
