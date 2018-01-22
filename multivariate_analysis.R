@@ -200,6 +200,8 @@ tol_lm11 = 1 - (summary(lm(NP ~ ., design)))$r.squared
 
 ## Transformation de variables
 
+# Premier facon
+
 boxplot(design$Temperature)
 boxplot(design$Depth)
 boxplot(design$Chlorophyll)
@@ -261,6 +263,78 @@ adonis(as.dist(jaccard_abundance) ~ exp(parm))
 # design$NH4 : normal -> F.Model = 1.7679 et R2 = 0.0111 ; 1/x -> F.model =  1.9368 et R2 = 0.0122
 # design$NP : normal -> F.Model = 1.0195 et R2 = 0.0065 ; log(x) -> F.model =  1.6458 et R2 = 0.0104
 # Sinon changements minimes pour transformations exp, log, sqrt, ^2 et 1/
+
+# Deuxieme facon (avec utilisation de boxcox)
+
+new_design = design
+
+library(EnvStats)
+
+for(i in 1:dim(design)[2]){
+  beta = min(design[,i])
+  if(beta <= 0){
+    new_design[,i] = design[,i] + 1 - beta
+  }
+  lambda = boxcox(new_design[,i], lambda = c(-5,5), optimize = TRUE, objective.name = "PPCC")$lambda
+  new_design[,i] = boxcoxTransform(new_design[,i], lambda = lambda)
+}
+
+ggpairs(new_design)
+
+X = matrix(NA,nrow=dim(design)[1],ncol=dim(design)[2])
+
+for(p in 1:dim(design)[2]){
+  X[,p] = new_design[,p]
+}
+
+det(t(X)%*%X) # de l'ordre de 10^20
+
+histogram(new_design$Temperature)
+histogram(new_design$Depth)
+histogram(new_design$Chlorophyll)
+histogram(new_design$Silicate)
+histogram(new_design$SI_temperature)
+histogram(new_design$SI_nitrates)
+histogram(new_design$NH4)
+histogram(new_design$NP)
+histogram(new_design$SSD)
+histogram(new_design$NO2NO3)
+histogram(new_design$Phosphates)
+
+shapiro.test(new_design$Temperature)
+shapiro.test(new_design$Depth)
+shapiro.test(new_design$Chlorophyll)
+shapiro.test(new_design$Silicate)
+shapiro.test(new_design$SI_temperature)
+shapiro.test(new_design$SI_nitrates)
+shapiro.test(new_design$NH4)
+shapiro.test(new_design$NP)
+shapiro.test(new_design$SSD)
+shapiro.test(new_design$NO2NO3)
+shapiro.test(new_design$Phosphates)
+
+adonis(as.dist(jaccard_abundance) ~ Temperature, data = design)
+adonis(as.dist(jaccard_abundance) ~ Temperature, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ Depth, data = design)
+adonis(as.dist(jaccard_abundance) ~ Depth, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ Chlorophyll, data = design)
+adonis(as.dist(jaccard_abundance) ~ Chlorophyll, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ Silicate, data = design)
+adonis(as.dist(jaccard_abundance) ~ Silicate, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ SI_temperature, data = design)
+adonis(as.dist(jaccard_abundance) ~ SI_temperature, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ SI_nitrates, data = design)
+adonis(as.dist(jaccard_abundance) ~ SI_nitrates, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ NH4, data = design)
+adonis(as.dist(jaccard_abundance) ~ NH4, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ SSD, data = design)
+adonis(as.dist(jaccard_abundance) ~ SSD, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ NP, data = design)
+adonis(as.dist(jaccard_abundance) ~ NP, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ NO2NO3, data = design)
+adonis(as.dist(jaccard_abundance) ~ NO2NO3, data = new_design)
+adonis(as.dist(jaccard_abundance) ~ Phosphates, data = design)
+adonis(as.dist(jaccard_abundance) ~ Phosphates, data = new_design)
 
 ####### Correction euclidienne
 
