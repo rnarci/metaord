@@ -1221,7 +1221,7 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
 
 
 
-
+######### Distances entre valeurs predites
 
 
 
@@ -1239,10 +1239,9 @@ v1 = sum(((H%*%Y)[1,])^2)
 
 D = as.matrix(dist(Y,method="euclidean",diag=TRUE))
 A = -0.5*D^2
-Id = diag(identity(4))
-un = t(t(c(1,1,1,1)))
-scale = Id-(1/4)*un%*%t(un)
-G = scale%*%A%*%scale
+n = 4
+J = diag(rep(1,n)) - matrix(1,n,n)/n
+G = J%*%A%*%J
 v2 = H[1,]%*%G%*%H[,1]
 
 # Essai 2 
@@ -1268,9 +1267,44 @@ for(i in 1:4){
 
 
 
+######### Distances entre résidus
 
 
 
+rm(list=objects())
+
+Y = matrix(c(1,2,4,7,8,9,3,4,2,5,6,4,1,5,8,9,5,7,1,2),4,5)
+Y = scale(Y)
+
+X = matrix(c(4,5,3,1,7,8,4,9,1,2,5,6),4,3)
+H = X%*%solve(t(X)%*%X)%*%t(X)
+
+
+
+D = as.matrix(dist(Y,method="euclidean",diag=TRUE))
+A = -0.5*D^2
+n = 4
+J = diag(rep(1,n)) - matrix(1,n,n)/n
+G = J%*%A%*%J
+
+Y_hat = H%*%Y 
+R = Y - Y_hat
+D1 = matrix(NA,4,4)
+
+for(i in 1:4){
+  for(j in 1:4){
+    D1[i,j] = sum((R[i,]-R[j,])^2)    
+  }
+}
+
+D2 = matrix(NA,4,4)
+I = diag(rep(1,n))
+
+for(i in 1:4){
+  for(j in 1:4){
+    D2[i,j] = (I-H)[i,]%*%G%*%(I-H)[,i] + (I-H)[j,]%*%G%*%(I-H)[,j] - 2*(I-H)[i,]%*%G%*%(I-H)[,j]
+  }
+}
 
 
 
@@ -1523,3 +1557,25 @@ ggplot(fdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() +
 # 
 # 
 # 
+
+
+
+
+########## Plot geographic map 
+
+# Premiere facon
+
+library(rworldmap)
+newmap <- getMap(resolution = "li")
+plot(newmap, xlim = c(-180, 90), ylim = c(-75, 75), asp = 1)
+points(gps$Mean_longitude, gps$Mean_latitude, col = res4 + 1, cex = .6, pch = 20)
+
+# Deuxieme facon 
+
+sbbox <- make_bbox(lon = gps$lon, lat = gps$lat, f = .1)
+sq_map <- get_map(location = sbbox, maptype = "watercolor", source = "google")
+
+
+ggmap(sq_map) + geom_point(data = gps, mapping = aes(x = gps$lon, y = gps$lat), color = "red") +
+  #geom_text(data = gps, aes(label = rownames(gps)), angle = 60, hjust = 0, color = "yellow")
+

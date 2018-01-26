@@ -4,6 +4,8 @@ library(vegan)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(stringr)
+
 
 ############################################################ Source custom scripts
 
@@ -15,16 +17,30 @@ data.wd <- "/home/rnarci/Bureau/CDDrnarci/Donnees/"
 design = read.table(file=file.path(data.wd, "param_bioadvection.csv"),sep="",header=TRUE)
 rownames(design) <- design$Sample
 
+############################################################ Import longitude and latitude of the stations
+
+gps = read.table(file=file.path(data.wd,"GPScoordinates2.csv"),header=TRUE,sep="")
+rownames(gps) <- gps$Station
+
 ############################################################ Import data
 
-size_fraction = "0.8-5"
-import_data(size_fraction, samples = rownames(design))
+size_fraction1 = "0-0.2"
+size_fraction2 = "0.22-3"
+size_fraction3 = "0.8-5"
+size_fraction4 = "5-20"
+size_fraction5 = "20-180"
+size_fraction6 = "180-2000"
 
-############################################################ Subset design
+import_data(size_fraction3, samples = rownames(design))
+
+############################################################ Subset design and (longitude,latitude)
 
 design <- design[metagenomic_sample, ]
 design <- design[,-c(1,6,7)]
 # design <- design[,-c(1,5,6,7,13)]
+
+gps <- gps[metagenomic_sample,]
+gps <- gps[,-1]
 
 library(mice)
 mice = complete(mice(design,method="norm.predict",m=1))
@@ -102,7 +118,7 @@ anova.cca(capscale(as.dist(jaccard_abundance) ~ Temperature + Silicate + NH4 + D
 
 
 
-
+########### Plot des stations en fonction de la longitude et la latitude
 
 
 
@@ -131,12 +147,12 @@ eigen_summary <- function(mat) {
   G = -0.5*J%*%D^2%*%J
   eigvalues <- eigen(G, only.values = T)$values
   
-  return(c("frac.neg" = mean(eigvalues < 0), ## fraction of negative eigenvalues 
-           summary(eigvalues) ## summary of eigenvalues
+  return(c("nb.zero.val" = sum(eigvalues >= - 10^-8 & eigvalues <= 10^-8),"nb.pos.val" = sum(eigvalues > 10^-8),"nb.neg.val" = sum(eigvalues < - 10^-8), ## number of negative eigenvalues 
+           round(summary(eigvalues), digits = 2) ## summary of eigenvalues
            ))
 }
 
-sapply(matrices.list2, eigen_summary) %>% t()
+sapply(matrices.list1, eigen_summary) %>% t()
 ## t(sapply(matrices.list1, eigen_summary))
 
 # for(mat in matrices.list1){
@@ -336,7 +352,7 @@ adonis(as.dist(jaccard_abundance) ~ NO2NO3, data = new_design)
 adonis(as.dist(jaccard_abundance) ~ Phosphates, data = design)
 adonis(as.dist(jaccard_abundance) ~ Phosphates, data = new_design)
 
-####### Correction euclidienne
+####################### Distances entre valeurs prédites
 
 D = jaccard_abundance
 n = dim(D)[1]
@@ -346,23 +362,20 @@ n = dim(D)[1]
 D_MDS1 = matrix(NA,n,n)
 D_MDS2 = matrix(NA,n,n)
 
-mod1 = capscale(as.dist(D) ~ Temperature + SSD + SI_temperature + Depth + Silicate + SI_nitrates, data = design)
-mod2 = capscale(as.dist(D) ~ Temperature, data = design)
-Y_tilde1 = as.matrix(mod1$CCA$u)
-Y_tilde1 = scale(Y_tilde1)
-Y_tilde2 = as.matrix(mod2$CCA$u)
-Y_tilde2 = scale(Y_tilde2)
+Y_tilde = cmdscale(D, k = n - 1)
 
-parms1 = c(design$Temperature,design$SSD,design$SI_temperature,design$Depth,design$Silicate,design$SI_nitrates)
-X1 = matrix(parms1,nrow=n,ncol=6)
-# parms2 = c(design$Temperature,design$Depth,design$Chlorophyll,design$Phosphates,design$Silicate,design$SI_temperature,design$SI_nitrates,design$NH4,design$NP,design$NO2NO3,design$SSD)
+# parms1 = c(design$Temperature,design$SSD,design$SI_temperature,design$Depth,design$Silicate,design$SI_nitrates)
+# X1 = matrix(parms1,nrow=n,ncol=6)
+parms1 = c(design$Depth)
+X1 = matrix(parms1,nrow=n,ncol=1)
 parms2 = design$Temperature
 X2 = matrix(parms2,nrow=n,ncol=1)
+
 H1 = X1%*%solve(t(X1)%*%X1)%*%t(X1)
 H2 = X2%*%solve(t(X2)%*%X2)%*%t(X2)
 
-Y_hat1 = H1%*%Y_tilde1 
-Y_hat2 = H2%*%Y_tilde2 
+Y_hat1 = H1%*%Y_tilde
+Y_hat2 = H2%*%Y_tilde
 
 for(i in 1:n){
   for(j in 1:n){
@@ -389,10 +402,8 @@ for(i in 1:n){
 ####### Pre-requis pour clustering par k-means
 
 fit1 = cmdscale(D, eig=TRUE, k=4)
-fit2 = cmdscale(D_MDS1, eig=TRUE, k=4)
-fit3 = cmdscale(D_without_MDS1, eig=TRUE, k=4)
-fit4 = cmdscale(D_MDS2, eig=TRUE, k=4)
-fit5 = cmdscale(D_without_MDS2, eig=TRUE, k=4)
+fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=4)
+fit3 = cmdscale(D_without_MDS2, eig=TRUE, k=4)
 
 ####### Pre-requis pour clustering ordinal
 
@@ -401,10 +412,8 @@ library(fcd)
 library(clues)
 
 kNN1 = make.kNNG(D, k = 35, symm = TRUE, weight = FALSE)
-kNN2 = make.kNNG(D_MDS1, k = 35, symm = TRUE, weight = FALSE)
-kNN3 = make.kNNG(D_without_MDS1, k = 35, symm = TRUE, weight = FALSE)
-kNN4 = make.kNNG(D_MDS2, k = 35, symm = TRUE, weight = FALSE)
-kNN5 = make.kNNG(D_without_MDS2, k = 35, symm = TRUE, weight = FALSE)
+kNN2 = make.kNNG(D_without_MDS1, k = 35, symm = TRUE, weight = FALSE)
+kNN3 = make.kNNG(D_without_MDS2, k = 35, symm = TRUE, weight = FALSE)
 
 ####### Clustering de l clusters
 
@@ -413,14 +422,10 @@ l = 3
 res1 = kmeans(fit1$points,l)$cluster
 res2 = kmeans(fit2$points,l)$cluster
 res3 = kmeans(fit3$points,l)$cluster
-res4 = kmeans(fit4$points,l)$cluster
-res5 = kmeans(fit5$points,l)$cluster
 
-res6 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res7 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res8 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res9 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res10 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res6 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
 # ####### Comparaison des clusterings
 # 
@@ -433,18 +438,257 @@ res10 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj =
 # }
 # tab
 
-################################## Classical clustering
+################################## Comparaison des clusterings
 
-###### Raw data vs corrected data 1 (only Temperature)
+###### Example : raw data vs predicted data 1 (only Temperature)
 
 temperature_data = data.frame(clus.raw = res1,
-                              clus.corrected.only.temperature = res2,
-                              clus.corrected.all.variables = res3) %>% 
+                              clus.predicted.all.variables = res2,
+                              clus.predicted.only.temperature = res3) %>% 
   mutate(Temperature = design$Temperature)
 head(temperature_data)
 
-tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.all.variables)
+tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.predicted.only.temperature)
 head(tdata)
 
 ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+
+
+
+
+
+
+
+
+
+
+####################### Distances entre résidus (la fonction capscale n'est pas necessaire : on peut utiliser)
+####################### la fonction cdmscale avec une dimension egale a n-1
+
+D = jaccard_abundance
+n = dim(D)[1]
+
+### Par MDS : 
+
+D_MDS1 = matrix(NA,n,n)
+D_MDS2 = matrix(NA,n,n)
+
+Y_tilde = cmdscale(D,k=n-1)
+
+# parms1 = c(design$Temperature,design$SSD,design$SI_temperature,design$Depth,design$Silicate,design$SI_nitrates)
+# X1 = matrix(parms1,nrow=n,ncol=6)
+parms1 = c(design$Temperature,design$SSD,design$Silicate)
+X1 = matrix(parms1,nrow=n,ncol=3)
+parms2 = design$Temperature
+X2 = matrix(parms2,nrow=n,ncol=1)
+
+H1 = X1%*%solve(t(X1)%*%X1)%*%t(X1)
+H2 = X2%*%solve(t(X2)%*%X2)%*%t(X2)
+
+Y_hat1 = H1%*%Y_tilde 
+Y_hat2 = H2%*%Y_tilde
+
+R1 = Y_tilde - Y_hat1
+R2 = Y_tilde - Y_hat2
+
+for(i in 1:n){
+  for(j in 1:n){
+    D_MDS1[i,j] = sqrt(sum((R1[i,] - R1[j,])^2)) 
+    D_MDS2[i,j] = sqrt(sum((R2[i,] - R2[j,])^2)) 
+  }
+}
+
+## Sans MDS
+
+D_without_MDS1 = matrix(NA,n,n)
+D_without_MDS2 = matrix(NA,n,n)
+
+J = diag(rep(1,n)) - matrix(1,n,n)/n
+G = -0.5*J%*%D^2%*%J
+I = diag(rep(1,n))
+
+for(i in 1:n){
+  for(j in 1:n){
+    D_without_MDS1[i,j] = sqrt((I-H1)[i,]%*%G%*%(I-H1)[,i] + (I-H1)[j,]%*%G%*%(I-H1)[,j] - 2*(I-H1)[i,]%*%G%*%(I-H1)[,j])
+    D_without_MDS2[i,j] = sqrt((I-H2)[i,]%*%G%*%(I-H2)[,i] + (I-H2)[j,]%*%G%*%(I-H2)[,j] - 2*(I-H2)[i,]%*%G%*%(I-H2)[,j])
+  }
+}
+
+####### Pre-requis pour clustering par k-means
+
+fit1 = cmdscale(D, eig=TRUE, k=4)
+fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=4)
+fit3 = cmdscale(D_without_MDS2, eig=TRUE, k=4)
+
+####### Pre-requis pour clustering ordinal
+
+library(loe)
+library(fcd)
+library(clues)
+
+kNN1 = make.kNNG(D, k = 35, symm = TRUE, weight = FALSE)
+kNN2 = make.kNNG(D_without_MDS1, k = 35, symm = TRUE, weight = FALSE)
+kNN3 = make.kNNG(D_without_MDS2, k = 35, symm = TRUE, weight = FALSE)
+
+####### Clustering de l clusters
+
+l = 3
+
+res1 = kmeans(fit1$points,l)$cluster
+res2 = kmeans(fit2$points,l)$cluster
+res3 = kmeans(fit3$points,l)$cluster
+
+
+res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res6 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+
+# ####### Comparaison des clusterings
+# 
+# tab = matrix(NA,10,10)
+# 
+# for(i in 1:10){
+#   for(j in 1:10){
+#     tab[i,j] = adjustedRand(get(paste("res",i,sep="")),get(paste("res",j,sep="")),randMethod="Rand") 
+#   }
+# }
+# tab
+
+################################## Comparaison des clusterings
+
+
+temperature_data = data.frame(clus.raw = res1,
+                              clus.corrected.all.variables = res2,
+                              clus.corrected.only.temperature = res3) %>% 
+  mutate(Temperature = design$Temperature)
+head(temperature_data)
+
+tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.only.temperature)
+head(tdata)
+
+ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+
+temperature_data = data.frame(clus.raw = res4,
+                              clus.corrected.all.variables = res5,
+                              clus.corrected.only.temperature = res6) %>% 
+  mutate(Temperature = design$Temperature)
+head(temperature_data)
+
+tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.only.temperature)
+head(tdata)
+
+ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+
+################################### Representation graphique : longitude en fonction de latitude
+
+######### Premiere facon
+
+library(rworldmap)
+newmap <- getMap(resolution = "li")
+
+color = c()
+labels = c()
+cl = res6
+
+for(i in 1:length(cl)){
+  if(cl[i]==1){
+    color[i] = "gold4"
+  }
+  if(cl[i]==2){
+    color[i] = "red"
+  }
+  if(cl[i]==3){
+    color[i] = "blue"
+  }
+  if(str_length(rownames(gps)[i]) == 5){
+    labels[i] = substr(rownames(gps)[i],1,1)
+  }
+  if(str_length(rownames(gps)[i]) == 6){
+    labels[i] = substr(rownames(gps)[i],1,2)
+  }
+  if(str_length(rownames(gps)[i]) == 7){
+    labels[i] = substr(rownames(gps)[i],1,3)
+  }
+}
+
+plot(newmap, xlim = c(-180, 90), ylim = c(-75, 75), asp = 1)
+points(gps$Mean_longitude, gps$Mean_latitude, col = color, cex = 1, pch = 17)
+text(gps$Mean_longitude, gps$Mean_latitude, labels = labels, pos = 1, col = "darkgreen", cex = 0.8)
+
+######### Deuxieme facon
+
+library(ggmap)
+library(maps)
+library(mapdata)
+
+
+sbbox <- make_bbox(lon = gps$Mean_longitude, lat = gps$Mean_latitude, f = .1)
+sq_map <- get_map(location = sbbox, maptype = "watercolor", source = "google")
+
+color = c()
+label = c()
+
+for(i in 1:length(res4)){
+  if(res4[i]==1){
+    color[i] = "black"
+  }
+  if(res4[i]==2){
+    color[i] = "red"
+  }
+  if(res4[i]==3){
+    color[i] = "blue"
+  }
+  if(str_length(rownames(gps)[i]) == 5){
+    label[i] = substr(rownames(gps)[i],1,1)
+  }
+  if(str_length(rownames(gps)[i]) == 6){
+    label[i] = substr(rownames(gps)[i],1,2)
+  }
+  if(str_length(rownames(gps)[i]) == 7){
+    label[î] = substr(rownames(gps)[i],1,3)
+  }
+}
+
+ggmap(sq_map) + geom_point(data = gps, mapping = aes(x = gps$Mean_longitude, y = gps$Mean_latitude), color = color, pch = 17, cex = 2) # +
+  #geom_text(data = gps, aes(label = rownames(gps)), angle = 60, hjust = 0, color = "yellow")
+
+
+
+# 
+# 
+# ############# Kendall kernel
+# 
+# D = jaccard_abundance
+# n = dim(jaccard_abundance)[1]
+# 
+# X1 = design$Temperature
+# X2 = design$Depth
+# 
+# nb_comp = round(factorial(n)/(2*factorial(n-2)))
+# d = length(design[1,])
+# Phi = matrix(NA, nrow = nb_comp, ncol = d)
+# 
+# 
+# for(parm in 1:d){
+#   a = 0
+#   for(i in 1:(n-1)){
+#     for(j in (i+1):n){
+#       a = a + 1
+#       if(design[i,parm] > design[j,parm]){
+#         Phi[a,parm] = 1
+#       }
+#       if(design[i,parm] < design[j,parm]){
+#         Phi[a,parm] = -1
+#       }
+#       if(design[i,parm] == design[j,parm]){
+#         Phi[a,parm] = 0
+#       }
+#     }
+#   }
+# }
+# 
+# Phi = (1/sqrt(nb_comp))*Phi
+# 
+# Kendall_kernel = t(Phi) %*% Phi
 
