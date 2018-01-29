@@ -506,7 +506,7 @@ D_without_MDS2 = matrix(NA,n,n)
 J = diag(rep(1,n)) - matrix(1,n,n)/n
 G = -0.5*J%*%D^2%*%J
 I = diag(rep(1,n))
-
+                                                                                                                      
 for(i in 1:n){
   for(j in 1:n){
     D_without_MDS1[i,j] = sqrt((I-H1)[i,]%*%G%*%(I-H1)[,i] + (I-H1)[j,]%*%G%*%(I-H1)[,j] - 2*(I-H1)[i,]%*%G%*%(I-H1)[,j])
