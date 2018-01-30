@@ -589,17 +589,17 @@ newmap <- getMap(resolution = "li")
 
 color = c()
 labels = c()
-cl = res6
+cl = res3
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
-    color[i] = "gold4"
+    color[i] = "blue"
   }
   if(cl[i]==2){
-    color[i] = "red"
+    color[i] = "gold4"
   }
   if(cl[i]==3){
-    color[i] = "blue"
+    color[i] = "red"
   }
   if(str_length(rownames(gps)[i]) == 5){
     labels[i] = substr(rownames(gps)[i],1,1)
