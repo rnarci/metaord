@@ -401,9 +401,9 @@ for(i in 1:n){
 
 ####### Pre-requis pour clustering par k-means
 
-fit1 = cmdscale(D, eig=TRUE, k=4)
-fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=4)
-fit3 = cmdscale(D_without_MDS2, eig=TRUE, k=4)
+fit1 = cmdscale(D, eig=TRUE, k=10)
+fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=10)
+fit3 = cmdscale(D_without_MDS2, eig=TRUE, k=10)
 
 ####### Pre-requis pour clustering ordinal
 
@@ -411,9 +411,9 @@ library(loe)
 library(fcd)
 library(clues)
 
-kNN1 = make.kNNG(D, k = 35, symm = TRUE, weight = FALSE)
-kNN2 = make.kNNG(D_without_MDS1, k = 35, symm = TRUE, weight = FALSE)
-kNN3 = make.kNNG(D_without_MDS2, k = 35, symm = TRUE, weight = FALSE)
+kNN1 = make.kNNG(D, k = 37, symm = TRUE, weight = FALSE)
+kNN2 = make.kNNG(D_without_MDS1, k = 37, symm = TRUE, weight = FALSE)
+kNN3 = make.kNNG(D_without_MDS2, k = 37, symm = TRUE, weight = FALSE)
 
 ####### Clustering de l clusters
 
@@ -516,9 +516,9 @@ for(i in 1:n){
 
 ####### Pre-requis pour clustering par k-means
 
-fit1 = cmdscale(D, eig=TRUE, k=4)
-fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=4)
-fit3 = cmdscale(D_without_MDS2, eig=TRUE, k=4)
+fit1 = cmdscale(D, eig=TRUE, k=10)
+fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=10)
+fit3 = cmdscale(D_without_MDS2, eig=TRUE, k=10)
 
 ####### Pre-requis pour clustering ordinal
 
@@ -526,9 +526,9 @@ library(loe)
 library(fcd)
 library(clues)
 
-kNN1 = make.kNNG(D, k = 35, symm = TRUE, weight = FALSE)
-kNN2 = make.kNNG(D_without_MDS1, k = 35, symm = TRUE, weight = FALSE)
-kNN3 = make.kNNG(D_without_MDS2, k = 35, symm = TRUE, weight = FALSE)
+kNN1 = make.kNNG(D, k = 37, symm = TRUE, weight = FALSE)
+kNN2 = make.kNNG(D_without_MDS1, k = 37, symm = TRUE, weight = FALSE)
+kNN3 = make.kNNG(D_without_MDS2, k = 37, symm = TRUE, weight = FALSE)
 
 ####### Clustering de l clusters
 
@@ -612,9 +612,23 @@ for(i in 1:length(cl)){
   }
 }
 
+DCM_indices = which(str_detect(rownames(gps),"DCM")==TRUE)
+SUR_indices = which(str_detect(rownames(gps),"SUR")==TRUE)
+
+SUR_only_indices = c()
+a = 1
+for(i in 1:length(cl)){
+  if(length(which(labels[SUR_indices][i]!=labels[DCM_indices]))==length(labels[DCM_indices])){
+    SUR_only_indices[a] = SUR_indices[i]  
+    a = a + 1
+  }
+}
+
 plot(newmap, xlim = c(-180, 90), ylim = c(-75, 75), asp = 1)
-points(gps$Mean_longitude, gps$Mean_latitude, col = color, cex = 1, pch = 17)
-text(gps$Mean_longitude, gps$Mean_latitude, labels = labels, pos = 1, col = "darkgreen", cex = 0.8)
+points(gps$Mean_longitude[DCM_indices], gps$Mean_latitude[DCM_indices], col = color[DCM_indices], cex = 1, pch = 17)
+points(gps$Mean_longitude[SUR_indices], gps$Mean_latitude[SUR_indices] + 2, col = color[SUR_indices], cex = 1, pch = 16)
+text(gps$Mean_longitude[DCM_indices], gps$Mean_latitude[DCM_indices], labels = labels[DCM_indices], pos = 1, col = "darkgreen", cex = 0.8, lty = 1)
+text(gps$Mean_longitude[SUR_only_indices], gps$Mean_latitude[SUR_only_indices] + 2, labels = labels[SUR_only_indices], pos = 1, col = "darkgreen", cex = 0.8, lty = 1)
 
 ######### Deuxieme facon
 
@@ -654,6 +668,38 @@ ggmap(sq_map) + geom_point(data = gps, mapping = aes(x = gps$Mean_longitude, y =
   #geom_text(data = gps, aes(label = rownames(gps)), angle = 60, hjust = 0, color = "yellow")
 
 
+library(ggplot2)
+library(reshape2)
+
+## Plot a distance matrix as a heatmap with samples sorted according to
+## order vector
+plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
+                                 low = "#B1F756", high = "#132B13") {
+  ## Args:
+  ## - dist: distance matrix (dist class)
+  ## - order: (optional) ordering of the samples of dist for representation
+  ## - title: (optional) graph title
+  ## - low, high: (optional) Colours for low and high ends of the gradient
+  ##
+  ## Returns:
+  ## - a ggplot2 object
+  data <- melt(as(dist, "matrix"))
+  colnames(data) <- c("x", "y", "distance")
+  if (!is.null(order)) {
+    data$x <- factor(data$x, levels = order)
+    data$y <- factor(data$y, levels = order)
+  }
+  p <- ggplot(data, aes(x = x, y = y, fill = distance)) + geom_tile()
+  p <- p + theme(axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 axis.text.x = element_blank(),
+                 axis.text.y = element_blank()) +
+    scale_fill_gradient(low = low, high = high)
+  if (!is.null(title)) {
+    p <- p + ggtitle(title)
+  }
+  return(p)
+}
 
 # 
 # 

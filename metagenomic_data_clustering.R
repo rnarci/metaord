@@ -7,10 +7,20 @@ library(cccd)
 library(fossil)
 library(igraph)
 
+############################################################ Source custom scripts
+
+source('~/metaord/utils.R')
+
 ############################################################ Import data
 
-size_fraction = "0.8-5"
-import_data(size_fraction)
+size_fraction1 = "0-0.2"
+size_fraction2 = "0.22-3"
+size_fraction3 = "0.8-5"
+size_fraction4 = "5-20"
+size_fraction5 = "20-180"
+size_fraction6 = "180-2000"
+
+import_data(size_fraction3, samples = NULL)
 
 ############################################################ First part : spectral clustering on k-NNG
 
@@ -32,17 +42,17 @@ for(k in 1:50){
   # 
   # kNN6 = make.kNNG(simka_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
   # 
-  kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = FALSE)
-  
-  kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
-  
-  kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
-  
-  kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
-  
-  kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = FALSE)
-  
-  kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+  # kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = FALSE)
+  # 
+  # kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+  # 
+  # kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
+  # 
+  # kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
+  # 
+  # kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = FALSE)
+  # 
+  # kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
   
   # kNN1 = make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = TRUE)
   # 
