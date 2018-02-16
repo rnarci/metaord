@@ -242,29 +242,29 @@ for(l in 2:15){
     
     for(nb_run in 1:100)
     {
-      # res1 = kmeans(fit1$points,l)$cluster
+      # res1 = kmeans(fit1$points,l,nstart = 1000)$cluster
       # 
-      # res2 = kmeans(fit2$points,l)$cluster
+      # res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
       # 
-      # res3 = kmeans(fit3$points,l)$cluster
+      # res3 = kmeans(fit3$points,l,nstart = 1000)$cluster
       # 
-      # res4 = kmeans(fit4$points,l)$cluster
+      # res4 = kmeans(fit4$points,l,nstart = 1000)$cluster
       # 
-      # res5 = kmeans(fit5$points,l)$cluster
+      # res5 = kmeans(fit5$points,l,nstart = 1000)$cluster
       # 
-      # res6 = kmeans(fit6$points,l)$cluster
+      # res6 = kmeans(fit6$points,l,nstart = 1000)$cluster
       
-      res7 = kmeans(fit7$points,l)$cluster
+      res7 = kmeans(fit7$points,l,nstart = 1000)$cluster
       
-      res8 = kmeans(fit8$points,l)$cluster
+      res8 = kmeans(fit8$points,l,nstart = 1000)$cluster
       
-      res9 = kmeans(fit9$points,l)$cluster
+      res9 = kmeans(fit9$points,l,nstart = 1000)$cluster
       
-      res10 = kmeans(fit10$points,l)$cluster
+      res10 = kmeans(fit10$points,l,nstart = 1000)$cluster
       
-      res11 = kmeans(fit11$points,l)$cluster
+      res11 = kmeans(fit11$points,l,nstart = 1000)$cluster
       
-      res12 = kmeans(fit12$points,l)$cluster
+      res12 = kmeans(fit12$points,l,nstart = 1000)$cluster
       
       
       

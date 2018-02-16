@@ -23,67 +23,209 @@ import_data(size_fraction, samples = NULL)
 
 ###### Abundance matrices
 
+# l = 5
+# iter = 1
+# RI = matrix(NA,9,3)
+# 
+# for(k1 in c(4,15,40))
+# {
+#   fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k1)
+#   fit2 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=k1)
+#   for(k2 in c(4,15,40)){
+#     fitbis1 = cmdscale(jaccard_abundance, eig=TRUE, k=k2)
+#     fitbis2 = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k2)
+# 
+#     res1 = kmeans(fit1$points,l,nstart = 25)$cluster
+#     res2 = kmeans(fit2$points,l,nstart = 25)$cluster
+#     resbis1 = kmeans(fitbis1$points,l,nstart = 25)$cluster
+#     resbis2 = kmeans(fitbis2$points,l,nstart = 25)$cluster
+# 
+#     RI[iter,1] = rand.index(get(paste("res",1,sep="")),get(paste("resbis",1,sep="")))
+#     RI[iter,2] = rand.index(get(paste("res",2,sep="")),get(paste("resbis",2,sep="")))
+#     RI[iter,3] = rand.index(get(paste("res",1,sep="")),get(paste("resbis",2,sep="")))
+#     iter = iter + 1
+#   }
+# }
+# 
+# fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k1)
+# fit2 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=k1)
+# res1 = kmeans(fit1$points,l,nstart = 1000)$cluster
+# res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
+# rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
+
 l = 5
 
-ARI1 = matrix(NA,100,50)
-RI1 = matrix(NA,100,50)
+# fitJ1 = cmdscale(jaccard_abundance, eig=TRUE, k=2)
+# fitJ2 = cmdscale(jaccard_abundance, eig=TRUE, k=3)
+# fitJ3 = cmdscale(jaccard_abundance, eig=TRUE, k=4)
+# 
+# fitS1 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=2)
+# fitS2 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=3)
+# fitS3 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=4)
 
-for(k in 1:50)
-{
-  fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k)
-  fit2 = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k)
+fitJ1 = cmdscale(jaccard_abundance, eig=TRUE, k=2)
+fitJ2 = cmdscale(jaccard_abundance, eig=TRUE, k=5)
+fitJ3 = cmdscale(jaccard_abundance, eig=TRUE, k=10)
 
-  for(nb_run in 1:100)
-  {
-    res1 = kmeans(fit1$points,l)$cluster
-    res2 = kmeans(fit2$points,l)$cluster
-      
-    ARI1[nb_run,k] = adjustedRand(get(paste("res",1,sep="")),get(paste("res",2,sep="")),randMethod="Rand")
-    RI1[nb_run,k] = rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
-  }
-}
+fitS1 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=2)
+fitS2 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=5)
+fitS3 = cmdscale(ab_sorensen_abundance, eig=TRUE, k=10)
 
-ARI = c()
-RI = c()
+fitB1 = cmdscale(braycurtis_abundance, eig=TRUE, k=2)
+fitB2 = cmdscale(braycurtis_abundance, eig=TRUE, k=5)
+fitB3 = cmdscale(braycurtis_abundance, eig=TRUE, k=10)
 
-for(k in 1:50){
-  ARI[k] = max(ARI1[,k]) 
-  RI[k] = max(RI1[,k]) 
-}
+resJ1 = kmeans(fitJ1$points,l,nstart = 1000)$cluster
+resJ2 = kmeans(fitJ2$points,l,nstart = 1000)$cluster
+resJ3 = kmeans(fitJ3$points,l,nstart = 1000)$cluster
 
+resS1 = kmeans(fitS1$points,l,nstart = 1000)$cluster
+resS2 = kmeans(fitS2$points,l,nstart = 1000)$cluster
+resS3 = kmeans(fitS3$points,l,nstart = 1000)$cluster
 
+resB1 = kmeans(fitB1$points,l,nstart = 1000)$cluster
+resB2 = kmeans(fitB2$points,l,nstart = 1000)$cluster
+resB3 = kmeans(fitB3$points,l,nstart = 1000)$cluster
 
+RI = matrix(NA,6,6)
+RI[1,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",1,sep=""))), 
+           rand.index(get(paste("resS",1,sep="")),get(paste("resS",1,sep=""))), 
+           rand.index(get(paste("resB",1,sep="")),get(paste("resB",1,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resS",1,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resB",1,sep=""))),
+           rand.index(get(paste("resS",1,sep="")),get(paste("resB",1,sep=""))))
+
+RI[2,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",2,sep=""))), 
+           rand.index(get(paste("resS",1,sep="")),get(paste("resS",2,sep=""))), 
+           rand.index(get(paste("resB",1,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resS",2,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resS",1,sep="")),get(paste("resB",2,sep=""))))
+
+RI[3,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",3,sep=""))), 
+           rand.index(get(paste("resS",1,sep="")),get(paste("resS",3,sep=""))), 
+           rand.index(get(paste("resB",1,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resS",3,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resS",1,sep="")),get(paste("resB",3,sep=""))))
+
+RI[4,] = c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",2,sep=""))), 
+           rand.index(get(paste("resS",2,sep="")),get(paste("resS",2,sep=""))), 
+           rand.index(get(paste("resB",2,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resS",2,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resS",2,sep="")),get(paste("resB",2,sep=""))))
+
+RI[5,] = c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",3,sep=""))), 
+           rand.index(get(paste("resS",2,sep="")),get(paste("resS",3,sep=""))), 
+           rand.index(get(paste("resB",2,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resS",3,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resS",2,sep="")),get(paste("resB",3,sep=""))))
+
+RI[6,] = c(rand.index(get(paste("resJ",3,sep="")),get(paste("resJ",3,sep=""))), 
+           rand.index(get(paste("resS",3,sep="")),get(paste("resS",3,sep=""))), 
+           rand.index(get(paste("resB",3,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resJ",3,sep="")),get(paste("resS",3,sep=""))),
+           rand.index(get(paste("resJ",3,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resS",3,sep="")),get(paste("resB",3,sep=""))))
 
 ###### Prevalence matrices
 
 
-ARI1 = matrix(NA,100,50)
-RI1 = matrix(NA,100,50)
+# ARI1 = matrix(NA,100,50)
+# RI1 = matrix(NA,100,50)
+# 
+# for(k in 1:50)
+# {
+#   fit1 = cmdscale(kulczynski_prevalence,eig=TRUE, k=k)
+#   fit2 = cmdscale(ochiai_prevalence,eig=TRUE, k=k)
+#   
+#   for(nb_run in 1:100)
+#   {
+#     res1 = kmeans(fit1$points,l,nstart = 25)$cluster
+#     res2 = kmeans(fit2$points,l,nstart = 25)$cluster
+#     
+#     ARI1[nb_run,k] = adjustedRand(get(paste("res",1,sep="")),get(paste("res",2,sep="")),randMethod="Rand")
+#     RI1[nb_run,k] = rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
+#   }
+# }
+# 
+# ARI = c()
+# RI = c()
+# 
+# for(k in 1:50){
+#   ARI[k] = max(ARI1[,k]) 
+#   RI[k] = max(RI1[,k]) 
+# }
 
-for(k in 1:50)
-{
-  fit1 = cmdscale(kulczynski_prevalence,eig=TRUE, k=k)
-  fit2 = cmdscale(ochiai_prevalence,eig=TRUE, k=k)
-  
-  for(nb_run in 1:100)
-  {
-    res1 = kmeans(fit1$points,l)$cluster
-    res2 = kmeans(fit2$points,l)$cluster
-    
-    ARI1[nb_run,k] = adjustedRand(get(paste("res",1,sep="")),get(paste("res",2,sep="")),randMethod="Rand")
-    RI1[nb_run,k] = rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
-  }
-}
 
-ARI = c()
-RI = c()
+fitK1 = cmdscale(kulczynski_prevalence, eig=TRUE, k=2)
+fitK2 = cmdscale(kulczynski_prevalence, eig=TRUE, k=5)
+fitK3 = cmdscale(kulczynski_prevalence, eig=TRUE, k=10)
 
-for(k in 1:50){
-  ARI[k] = max(ARI1[,k]) 
-  RI[k] = max(RI1[,k]) 
-}
+fitO1 = cmdscale(ochiai_prevalence, eig=TRUE, k=2)
+fitO2 = cmdscale(ochiai_prevalence, eig=TRUE, k=5)
+fitO3 = cmdscale(ochiai_prevalence, eig=TRUE, k=10)
 
+fitW1 = cmdscale(whittaker_prevalence, eig=TRUE, k=2)
+fitW2 = cmdscale(whittaker_prevalence, eig=TRUE, k=5)
+fitW3 = cmdscale(whittaker_prevalence, eig=TRUE, k=10)
 
+resK1 = kmeans(fitK1$points,l,nstart = 1000)$cluster
+resK2 = kmeans(fitK2$points,l,nstart = 1000)$cluster
+resK3 = kmeans(fitK3$points,l,nstart = 1000)$cluster
+
+resO1 = kmeans(fitO1$points,l,nstart = 1000)$cluster
+resO2 = kmeans(fitO2$points,l,nstart = 1000)$cluster
+resO3 = kmeans(fitO3$points,l,nstart = 1000)$cluster
+
+resW1 = kmeans(fitW1$points,l,nstart = 1000)$cluster
+resW2 = kmeans(fitW2$points,l,nstart = 1000)$cluster
+resW3 = kmeans(fitW3$points,l,nstart = 1000)$cluster
+
+RI = matrix(NA,6,6)
+RI[1,] = c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",1,sep=""))), 
+           rand.index(get(paste("resO",1,sep="")),get(paste("resO",1,sep=""))), 
+           rand.index(get(paste("resW",1,sep="")),get(paste("resW",1,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resO",1,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resW",1,sep=""))),
+           rand.index(get(paste("resO",1,sep="")),get(paste("resW",1,sep=""))))
+
+RI[2,] = c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",2,sep=""))), 
+           rand.index(get(paste("resO",1,sep="")),get(paste("resO",2,sep=""))), 
+           rand.index(get(paste("resW",1,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resO",2,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resO",1,sep="")),get(paste("resW",2,sep=""))))
+
+RI[3,] = c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",3,sep=""))), 
+           rand.index(get(paste("resO",1,sep="")),get(paste("resO",3,sep=""))), 
+           rand.index(get(paste("resW",1,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resO",3,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resO",1,sep="")),get(paste("resW",3,sep=""))))
+
+RI[4,] = c(rand.index(get(paste("resK",2,sep="")),get(paste("resK",2,sep=""))), 
+           rand.index(get(paste("resO",2,sep="")),get(paste("resO",2,sep=""))), 
+           rand.index(get(paste("resW",2,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resO",2,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resO",2,sep="")),get(paste("resW",2,sep=""))))
+
+RI[5,] = c(rand.index(get(paste("resK",2,sep="")),get(paste("resK",3,sep=""))), 
+           rand.index(get(paste("resO",2,sep="")),get(paste("resO",3,sep=""))), 
+           rand.index(get(paste("resW",2,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resO",3,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resO",2,sep="")),get(paste("resW",3,sep=""))))
+
+RI[6,] = c(rand.index(get(paste("resK",3,sep="")),get(paste("resK",3,sep=""))), 
+           rand.index(get(paste("resO",3,sep="")),get(paste("resO",3,sep=""))), 
+           rand.index(get(paste("resW",3,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resK",3,sep="")),get(paste("resO",3,sep=""))),
+           rand.index(get(paste("resK",3,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resO",3,sep="")),get(paste("resW",3,sep=""))))
 
 
 ############################## k-NNG + spectral clustering
@@ -91,65 +233,208 @@ for(k in 1:50){
 
 ###### Abundance matrices
 
-l = 5
+# l = 5
+# 
+# ARI1 = matrix(NA,100,50)
+# RI1 = matrix(NA,100,50)
+# 
+# for(k in 1:50)
+# {
+#   kNN1 =  make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+#   kNN2 = make.kNNG(ab_sorensen_abundance, k = k, symm = TRUE, weight = FALSE)
+#   
+#   for(nb_run in 1:100)
+#   {
+#     res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     ARI1[nb_run,k] = adjustedRand(get(paste("res",1,sep="")),get(paste("res",2,sep="")),randMethod="Rand")
+#     RI1[nb_run,k] = rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
+#   }
+# }
+# 
+# ARI = c()
+# RI = c()
+# 
+# for(k in 1:50){
+#   ARI[k] = max(ARI1[,k]) 
+#   RI[k] = max(RI1[,k]) 
+# }
 
-ARI1 = matrix(NA,100,50)
-RI1 = matrix(NA,100,50)
+fitJ1 = make.kNNG(jaccard_abundance, k = 10, symm = TRUE, weight = FALSE)
+fitJ2 = make.kNNG(jaccard_abundance, k = 25, symm = TRUE, weight = FALSE)
+fitJ3 = make.kNNG(jaccard_abundance, k = 40, symm = TRUE, weight = FALSE)
 
-for(k in 1:50)
-{
-  kNN1 =  make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
-  kNN2 = make.kNNG(ab_sorensen_abundance, k = k, symm = TRUE, weight = FALSE)
+fitS1 = make.kNNG(ab_sorensen_abundance, k = 10, symm = TRUE, weight = FALSE)
+fitS2 = make.kNNG(ab_sorensen_abundance, k = 25, symm = TRUE, weight = FALSE)
+fitS3 = make.kNNG(ab_sorensen_abundance, k = 40, symm = TRUE, weight = FALSE)
+
+fitB1 = make.kNNG(braycurtis_abundance, k = 10, symm = TRUE, weight = FALSE)
+fitB2 = make.kNNG(braycurtis_abundance, k = 25, symm = TRUE, weight = FALSE)
+fitB3 = make.kNNG(braycurtis_abundance, k = 40, symm = TRUE, weight = FALSE)
+
+RI = matrix(0,6,6)
+
+for(iter in 1:100){
+  resJ1 = spectral.clustering(fitJ1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resJ2 = spectral.clustering(fitJ2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resJ3 = spectral.clustering(fitJ3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
   
-  for(nb_run in 1:100)
-  {
-    res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    ARI1[nb_run,k] = adjustedRand(get(paste("res",1,sep="")),get(paste("res",2,sep="")),randMethod="Rand")
-    RI1[nb_run,k] = rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
-  }
+  resS1 = spectral.clustering(fitS1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resS2 = spectral.clustering(fitS2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resS3 = spectral.clustering(fitS3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  
+  resB1 = spectral.clustering(fitB1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resB2 = spectral.clustering(fitB2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resB3 = spectral.clustering(fitB3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  
+  RI[1,] = RI[1,] + c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",1,sep=""))), 
+                      rand.index(get(paste("resS",1,sep="")),get(paste("resS",1,sep=""))), 
+                      rand.index(get(paste("resB",1,sep="")),get(paste("resB",1,sep=""))),
+                      rand.index(get(paste("resJ",1,sep="")),get(paste("resS",1,sep=""))),
+                      rand.index(get(paste("resJ",1,sep="")),get(paste("resB",1,sep=""))),
+                      rand.index(get(paste("resS",1,sep="")),get(paste("resB",1,sep=""))))
+  
+  RI[2,] = RI[2,] + c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",2,sep=""))), 
+                      rand.index(get(paste("resS",1,sep="")),get(paste("resS",2,sep=""))), 
+                      rand.index(get(paste("resB",1,sep="")),get(paste("resB",2,sep=""))),
+                      rand.index(get(paste("resJ",1,sep="")),get(paste("resS",2,sep=""))),
+                      rand.index(get(paste("resJ",1,sep="")),get(paste("resB",2,sep=""))),
+                      rand.index(get(paste("resS",1,sep="")),get(paste("resB",2,sep=""))))
+  
+  RI[3,] = RI[3,] + c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",3,sep=""))), 
+                      rand.index(get(paste("resS",1,sep="")),get(paste("resS",3,sep=""))), 
+                      rand.index(get(paste("resB",1,sep="")),get(paste("resB",3,sep=""))),
+                      rand.index(get(paste("resJ",1,sep="")),get(paste("resS",3,sep=""))),
+                      rand.index(get(paste("resJ",1,sep="")),get(paste("resB",3,sep=""))),
+                      rand.index(get(paste("resS",1,sep="")),get(paste("resB",3,sep=""))))
+  
+  RI[4,] = RI[4,] + c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",2,sep=""))), 
+                      rand.index(get(paste("resS",2,sep="")),get(paste("resS",2,sep=""))), 
+                      rand.index(get(paste("resB",2,sep="")),get(paste("resB",2,sep=""))),
+                      rand.index(get(paste("resJ",2,sep="")),get(paste("resS",2,sep=""))),
+                      rand.index(get(paste("resJ",2,sep="")),get(paste("resB",2,sep=""))),
+                      rand.index(get(paste("resS",2,sep="")),get(paste("resB",2,sep=""))))
+  
+  RI[5,] = RI[5,] + c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",3,sep=""))), 
+                      rand.index(get(paste("resS",2,sep="")),get(paste("resS",3,sep=""))), 
+                      rand.index(get(paste("resB",2,sep="")),get(paste("resB",3,sep=""))),
+                      rand.index(get(paste("resJ",2,sep="")),get(paste("resS",3,sep=""))),
+                      rand.index(get(paste("resJ",2,sep="")),get(paste("resB",3,sep=""))),
+                      rand.index(get(paste("resS",2,sep="")),get(paste("resB",3,sep=""))))
+  
+  RI[6,] = RI[6,] + c(rand.index(get(paste("resJ",3,sep="")),get(paste("resJ",3,sep=""))), 
+                      rand.index(get(paste("resS",3,sep="")),get(paste("resS",3,sep=""))), 
+                      rand.index(get(paste("resB",3,sep="")),get(paste("resB",3,sep=""))),
+                      rand.index(get(paste("resJ",3,sep="")),get(paste("resS",3,sep=""))),
+                      rand.index(get(paste("resJ",3,sep="")),get(paste("resB",3,sep=""))),
+                      rand.index(get(paste("resS",3,sep="")),get(paste("resB",3,sep=""))))
 }
 
-ARI = c()
-RI = c()
-
-for(k in 1:50){
-  ARI[k] = max(ARI1[,k]) 
-  RI[k] = max(RI1[,k]) 
-}
-
+RI = RI/100
 
 ###### Prevalence matrices
 
 
-ARI1 = matrix(NA,100,50)
-RI1 = matrix(NA,100,50)
+# ARI1 = matrix(NA,100,50)
+# RI1 = matrix(NA,100,50)
+#
+# for(k in 1:50)
+# {
+#   kNN1 =  make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
+#   kNN2 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
+#   
+#   for(nb_run in 1:100)
+#   {
+#     res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     ARI1[nb_run,k] = adjustedRand(get(paste("res",1,sep="")),get(paste("res",2,sep="")),randMethod="Rand")
+#     RI1[nb_run,k] = rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
+#   }
+# }
+# 
+# ARI = c()
+# RI = c()
+# 
+# for(k in 1:50){
+#   ARI[k] = max(ARI1[,k]) 
+#   RI[k] = max(RI1[,k]) 
+# }
 
-for(k in 1:50)
-{
-  kNN1 =  make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
-  kNN2 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
+fitK1 = make.kNNG(kulczynski_prevalence, k = 10, symm = TRUE, weight = FALSE)
+fitK2 = make.kNNG(kulczynski_prevalence, k = 25, symm = TRUE, weight = FALSE)
+fitK3 = make.kNNG(kulczynski_prevalence, k = 40, symm = TRUE, weight = FALSE)
+
+fitO1 = make.kNNG(ochiai_prevalence, k = 10, symm = TRUE, weight = FALSE)
+fitO2 = make.kNNG(ochiai_prevalence, k = 25, symm = TRUE, weight = FALSE)
+fitO3 = make.kNNG(ochiai_prevalence, k = 40, symm = TRUE, weight = FALSE)
+
+fitW1 = make.kNNG(whittaker_prevalence, k = 10, symm = TRUE, weight = FALSE)
+fitW2 = make.kNNG(whittaker_prevalence, k = 25, symm = TRUE, weight = FALSE)
+fitW3 = make.kNNG(whittaker_prevalence, k = 40, symm = TRUE, weight = FALSE)
+
+RI = matrix(0,6,6)
+
+for(iter in 1:100){
+  resK1 = spectral.clustering(fitK1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resK2 = spectral.clustering(fitK2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resK3 = spectral.clustering(fitK3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
   
-  for(nb_run in 1:100)
-  {
-    res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    ARI1[nb_run,k] = adjustedRand(get(paste("res",1,sep="")),get(paste("res",2,sep="")),randMethod="Rand")
-    RI1[nb_run,k] = rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
-  }
+  resO1 = spectral.clustering(fitO1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resO2 = spectral.clustering(fitO2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resO3 = spectral.clustering(fitO3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  
+  resW1 = spectral.clustering(fitW1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resW2 = spectral.clustering(fitW2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resW3 = spectral.clustering(fitW3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  
+  RI[1,] = RI[1,] + c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",1,sep=""))), 
+                      rand.index(get(paste("resO",1,sep="")),get(paste("resO",1,sep=""))), 
+                      rand.index(get(paste("resW",1,sep="")),get(paste("resW",1,sep=""))),
+                      rand.index(get(paste("resK",1,sep="")),get(paste("resO",1,sep=""))),
+                      rand.index(get(paste("resK",1,sep="")),get(paste("resW",1,sep=""))),
+                      rand.index(get(paste("resO",1,sep="")),get(paste("resW",1,sep=""))))
+  
+  RI[2,] = RI[2,] + c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",2,sep=""))), 
+                      rand.index(get(paste("resO",1,sep="")),get(paste("resO",2,sep=""))), 
+                      rand.index(get(paste("resW",1,sep="")),get(paste("resW",2,sep=""))),
+                      rand.index(get(paste("resK",1,sep="")),get(paste("resO",2,sep=""))),
+                      rand.index(get(paste("resK",1,sep="")),get(paste("resW",2,sep=""))),
+                      rand.index(get(paste("resO",1,sep="")),get(paste("resW",2,sep=""))))
+  
+  RI[3,] = RI[3,] + c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",3,sep=""))), 
+                      rand.index(get(paste("resO",1,sep="")),get(paste("resO",3,sep=""))), 
+                      rand.index(get(paste("resW",1,sep="")),get(paste("resW",3,sep=""))),
+                      rand.index(get(paste("resK",1,sep="")),get(paste("resO",3,sep=""))),
+                      rand.index(get(paste("resK",1,sep="")),get(paste("resW",3,sep=""))),
+                      rand.index(get(paste("resO",1,sep="")),get(paste("resW",3,sep=""))))
+  
+  RI[4,] = RI[4,] + c(rand.index(get(paste("resK",2,sep="")),get(paste("resK",2,sep=""))), 
+                      rand.index(get(paste("resO",2,sep="")),get(paste("resO",2,sep=""))), 
+                      rand.index(get(paste("resW",2,sep="")),get(paste("resW",2,sep=""))),
+                      rand.index(get(paste("resK",2,sep="")),get(paste("resO",2,sep=""))),
+                      rand.index(get(paste("resK",2,sep="")),get(paste("resW",2,sep=""))),
+                      rand.index(get(paste("resO",2,sep="")),get(paste("resW",2,sep=""))))
+  
+  
+  RI[5,] = RI[5,] + c(rand.index(get(paste("resK",2,sep="")),get(paste("resK",3,sep=""))), 
+                      rand.index(get(paste("resO",2,sep="")),get(paste("resO",3,sep=""))), 
+                      rand.index(get(paste("resW",2,sep="")),get(paste("resW",3,sep=""))),
+                      rand.index(get(paste("resK",2,sep="")),get(paste("resO",3,sep=""))),
+                      rand.index(get(paste("resK",2,sep="")),get(paste("resW",3,sep=""))),
+                      rand.index(get(paste("resO",2,sep="")),get(paste("resW",3,sep=""))))
+  
+  RI[6,] = RI[6,] + c(rand.index(get(paste("resK",3,sep="")),get(paste("resK",3,sep=""))), 
+                      rand.index(get(paste("resO",3,sep="")),get(paste("resO",3,sep=""))), 
+                      rand.index(get(paste("resW",3,sep="")),get(paste("resW",3,sep=""))),
+                      rand.index(get(paste("resK",3,sep="")),get(paste("resO",3,sep=""))),
+                      rand.index(get(paste("resK",3,sep="")),get(paste("resW",3,sep=""))),
+                      rand.index(get(paste("resO",3,sep="")),get(paste("resW",3,sep=""))))
+  
 }
 
-ARI = c()
-RI = c()
-
-for(k in 1:50){
-  ARI[k] = max(ARI1[,k]) 
-  RI[k] = max(RI1[,k]) 
-}
-
-
+RI = RI/100
 
 
 ##################################### Comparison between clusterings 
@@ -319,6 +604,10 @@ mice = complete(mice(design,method="norm.predict",m=1))
 design$Phosphates = mice$Phosphates
 design$NO2NO3 = mice$NO2NO3
 
+lagrangien = read.table(file=file.path(data.wd,"tarrive_min_surface_1000.csv"),header=TRUE, sep="")
+colnames(lagrangien) <- rownames(lagrangien)
+lagrangien = lagrangien[metagenomic_sample,metagenomic_sample]
+
 ######################################## To calculate predicted distances
 
 D = jaccard_abundance
@@ -359,9 +648,9 @@ kNN3 = make.kNNG(D_without_MDS2, k = 37, symm = TRUE, weight = FALSE)
 
 l = 3
 
-res1 = kmeans(fit1$points,l)$cluster
-res2 = kmeans(fit2$points,l)$cluster
-res3 = kmeans(fit3$points,l)$cluster
+res1 = kmeans(fit1$points,l, nstart = 1000)$cluster
+res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
+res3 = kmeans(fit3$points,l, nstart = 1000)$cluster
 
 res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
@@ -371,24 +660,24 @@ res6 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = 
 ########## Boxplots : clustering on numeric distances
 
 temperature_data = data.frame(clus.raw = res1,
-                              clus.predicted.all.variables = res2,
-                              clus.predicted.only.temperature = res3) %>% 
+                              clus.predicted.all.variables = res2
+                              ) %>% 
   mutate(Temperature = design$Temperature)
 
-tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.predicted.only.temperature)
+tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.predicted.all.variables)
 
-ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 2)
 
 ########## Boxplots : clustering on ordinal distances
 
-temperature_data = data.frame(clus.raw = res4,
-                              clus.predicted.all.variables = res5,
-                              clus.predicted.only.temperature = res6) %>% 
-  mutate(Temperature = design$Temperature)
-
-tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.predicted.only.temperature)
-
-ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+# temperature_data = data.frame(clus.raw = res4,
+#                               clus.predicted.all.variables = res5,
+#                               clus.predicted.only.temperature = res6) %>% 
+#   mutate(Temperature = design$Temperature)
+# 
+# tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.predicted.only.temperature)
+# 
+# ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
 
 ################################## Map resulting clusters on raw distances (ordinal setting)
 
@@ -397,17 +686,17 @@ newmap <- getMap(resolution = "li")
 
 color = c()
 labels = c()
-cl = res4
+cl = res1
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
-    color[i] = "blue"
+    color[i] = "coral4"
   }
   if(cl[i]==2){
-    color[i] = "gold4"
+    color[i] = "darkviolet"
   }
   if(cl[i]==3){
-    color[i] = "red"
+    color[i] = "black"
   }
   if(str_length(rownames(gps)[i]) == 5){
     labels[i] = substr(rownames(gps)[i],1,1)
@@ -444,7 +733,7 @@ text(gps$Mean_longitude[SUR_only_indices], gps$Mean_latitude[SUR_only_indices] +
 
 color = c()
 labels = c()
-cl = res6
+cl = res3
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
@@ -492,7 +781,7 @@ text(gps$Mean_longitude[SUR_only_indices], gps$Mean_latitude[SUR_only_indices] +
 
 color = c()
 labels = c()
-cl = res5
+cl = res2
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
@@ -558,9 +847,23 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
   return(p)
 }
 
-plot_dist_as_heatmap(as.dist(D), order = order(as.numeric(labels)), title = "Heatmap for raw distance matrix")
+####### Remove colnames and rownames
+
+D_bis = matrix(NA,n,n)
+
+for(i in 1:n){
+  D_bis[i,] = D[i,]
+}
+
+plot_dist_as_heatmap(as.dist(D_bis), order = order(as.numeric(labels)), title = "Heatmap for raw distance matrix")
 plot_dist_as_heatmap(as.dist(D_without_MDS2), order = order(as.numeric(labels)), title = "Heatmap for predicted distance matrix (only temperature)")
 plot_dist_as_heatmap(as.dist(D_without_MDS1), order = order(as.numeric(labels)), title = "Heatmap for predicted distance matrix (all variables)")
+
+######## Plot of two distance matrices
+
+plot(as.dist(D),as.dist(D_without_MDS1),xlab="Distances brutes",ylab="Distances prédites",pch=16,col="blue", main="Toutes les covariables",cex.main=1.8,cex.lab=1.3)
+plot(as.dist(D),as.dist(D_without_MDS2),xlab="Distances brutes",ylab="Distances prédites",pch=16,col="blue", main="Temperature uniquement",cex.main=1.8,cex.lab=1.3)
+plot(as.dist(D),as.dist(lagrangien),xlab="Distances brutes",ylab="Distances Lagrangiennes",pch=16,col="blue",cex.lab=1.3)
 
 ######################################## To calculate corrected distances
 
@@ -583,9 +886,9 @@ kNN1 = make.kNNG(D, k = 37, symm = TRUE, weight = FALSE)
 kNN2 = make.kNNG(D_without_MDS1, k = 37, symm = TRUE, weight = FALSE)
 kNN3 = make.kNNG(D_without_MDS2, k = 37, symm = TRUE, weight = FALSE)
 
-res1 = kmeans(fit1$points,l)$cluster
-res2 = kmeans(fit2$points,l)$cluster
-res3 = kmeans(fit3$points,l)$cluster
+res1 = kmeans(fit1$points,l, nstart = 1000)$cluster
+res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
+res3 = kmeans(fit3$points,l, nstart = 1000)$cluster
 
 
 res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
@@ -596,42 +899,41 @@ res6 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = 
 ########## Boxplots : clustering on numeric distances
 
 temperature_data = data.frame(clus.raw = res1,
-                              clus.corrected.all.variables = res2,
-                              clus.corrected.only.temperature = res3) %>% 
+                              clus.corrected.all.variables = res2) %>% 
   mutate(Temperature = design$Temperature)
 
-tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.only.temperature)
+tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.all.variables)
 
-ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 2)
 
 
 ########## Boxplots : clustering on ordinal distances
 
-temperature_data = data.frame(clus.raw = res4,
-                              clus.corrected.all.variables = res5,
-                              clus.corrected.only.temperature = res6) %>% 
-  mutate(Temperature = design$Temperature)
-
-tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.only.temperature)
-
-ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+# temperature_data = data.frame(clus.raw = res4,
+#                               clus.corrected.all.variables = res5,
+#                               clus.corrected.only.temperature = res6) %>% 
+#   mutate(Temperature = design$Temperature)
+# 
+# tdata <- gather(temperature_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.only.temperature)
+# 
+# ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
 
 
 ########## Map of resulting clusters : raw vs correct. with Temperature only
 
 color = c()
 labels = c()
-cl = res6
+cl = res3
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
-    color[i] = "gold4"
+    color[i] = "blue"
   }
   if(cl[i]==2){
     color[i] = "red"
   }
   if(cl[i]==3){
-    color[i] = "blue"
+    color[i] = "gold4"
   }
   if(str_length(rownames(gps)[i]) == 5){
     labels[i] = substr(rownames(gps)[i],1,1)
@@ -669,17 +971,17 @@ text(gps$Mean_longitude[SUR_only_indices], gps$Mean_latitude[SUR_only_indices] +
 
 color = c()
 labels = c()
-cl = res5
+cl = res2
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
-    color[i] = "blue"
-  }
-  if(cl[i]==2){
     color[i] = "red"
   }
-  if(cl[i]==3){
+  if(cl[i]==2){
     color[i] = "gold4"
+  }
+  if(cl[i]==3){
+    color[i] = "blue"
   }
   if(str_length(rownames(gps)[i]) == 5){
     labels[i] = substr(rownames(gps)[i],1,1)
@@ -714,3 +1016,8 @@ text(gps$Mean_longitude[SUR_only_indices], gps$Mean_latitude[SUR_only_indices] +
 
 plot_dist_as_heatmap(as.dist(D_without_MDS2), order = order(as.numeric(labels)), title = "Heatmap for corrected distance matrix (only temperature)")
 plot_dist_as_heatmap(as.dist(D_without_MDS1), order = order(as.numeric(labels)), title = "Heatmap for corrected distance matrix (all variables)")
+
+######## Plot of two distance matrices
+
+plot(as.dist(D),as.dist(D_without_MDS1),xlab="Distances brutes",ylab="Distances corrigées",pch=16,col="blue",main="Toutes les covariables",cex.main=1.8,cex.lab=1.3)
+plot(as.dist(D),as.dist(D_without_MDS2),xlab="Distances brutes",ylab="Distances corrigées",pch=16,col="blue",main="Temperature uniquement",cex.main=1.8,cex.lab=1.3)

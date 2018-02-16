@@ -286,7 +286,7 @@ setwd(oldwd)
 # shapes.two.moon<-function(numObjects,shape1a,shape2b,shape1rFrom, shape1rTo,shape2rFrom, shape2rTo, outputCsv, outputCsv2, outputColNames, outputRowNames){
 #   lo<-.numObjects(numObjects,2)
 #   x <- matrix(0, nrow=sum(lo), ncol=2)
-#   
+# 
 #   for(i in 1:sum(lo)){
 #     alpha<-runif(1,0,2*pi)
 #     if(i>lo[1]){

@@ -22,6 +22,11 @@ rownames(design) <- design$Sample
 gps = read.table(file=file.path(data.wd,"GPScoordinates2.csv"),header=TRUE,sep="")
 rownames(gps) <- gps$Station
 
+############################################################ Lagrangian distances
+
+lagrangien = read.table(file=file.path(data.wd,"tarrive_min_surface_1000.csv"),header=TRUE, sep="")
+colnames(lagrangien) <- rownames(lagrangien)
+
 ############################################################ Import data
 
 size_fraction1 = "0-0.2"
@@ -42,10 +47,15 @@ design <- design[,-c(1,6,7)]
 gps <- gps[metagenomic_sample,]
 gps <- gps[,-1]
 
+lagrangien = lagrangien[metagenomic_sample,metagenomic_sample]
+
 library(mice)
 mice = complete(mice(design,method="norm.predict",m=1))
 design$Phosphates = mice$Phosphates
 design$NO2NO3 = mice$NO2NO3
+
+design[,c(12,13)] = c(gps$Mean_latitude,gps$Mean_longitude)
+colnames(design)[c(12,13)] = c("Latitude","Longitude")
 
 # missDummy <- function(t)
 # {
@@ -61,6 +71,8 @@ design$NO2NO3 = mice$NO2NO3
 
 ############################################################ ADONIS
 
+adonis(as.dist(jaccard_abundance) ~ Latitude, data = design)
+adonis(as.dist(jaccard_abundance) ~ Longitude, data = design)
 adonis(as.dist(jaccard_abundance) ~ Depth, data = design)
 adonis(as.dist(jaccard_abundance) ~ Temperature, data = design)
 adonis(as.dist(jaccard_abundance) ~ Chlorophyll, data = design)
@@ -417,11 +429,11 @@ kNN3 = make.kNNG(D_without_MDS2, k = 37, symm = TRUE, weight = FALSE)
 
 ####### Clustering de l clusters
 
-l = 3
+l = 2
 
-res1 = kmeans(fit1$points,l)$cluster
-res2 = kmeans(fit2$points,l)$cluster
-res3 = kmeans(fit3$points,l)$cluster
+res1 = kmeans(fit1$points,l, nstart = 1000)$cluster
+res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
+res3 = kmeans(fit3$points,l, nstart = 1000)$cluster
 
 res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
@@ -456,6 +468,14 @@ ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() +
 
 
 
+depth_data = data.frame(clus.raw = res1,
+                              clus.corrected.all.variables = res2,
+                              clus.corrected.only.temperature = res3) %>%
+  mutate(Depth = design$Depth)
+
+ddata <- gather(depth_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.only.temperature)
+
+ggplot(ddata, aes(x = Group, y = Depth, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
 
 
 
@@ -479,7 +499,7 @@ Y_tilde = cmdscale(D,k=n-1)
 # X1 = matrix(parms1,nrow=n,ncol=6)
 parms1 = c(design$Temperature,design$SSD,design$Silicate)
 X1 = matrix(parms1,nrow=n,ncol=3)
-parms2 = design$Temperature
+parms2 = design$Depth
 X2 = matrix(parms2,nrow=n,ncol=1)
 
 H1 = X1%*%solve(t(X1)%*%X1)%*%t(X1)
@@ -532,11 +552,11 @@ kNN3 = make.kNNG(D_without_MDS2, k = 37, symm = TRUE, weight = FALSE)
 
 ####### Clustering de l clusters
 
-l = 3
+l = 2
 
-res1 = kmeans(fit1$points,l)$cluster
-res2 = kmeans(fit2$points,l)$cluster
-res3 = kmeans(fit3$points,l)$cluster
+res1 = kmeans(fit1$points,l, nstart = 1000)$cluster
+res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
+res3 = kmeans(fit3$points,l, nstart = 1000)$cluster
 
 
 res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
@@ -580,6 +600,15 @@ head(tdata)
 
 ggplot(tdata, aes(x = Group, y = Temperature, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
 
+# depth_data = data.frame(clus.raw = res1,
+#                               clus.corrected.all.variables = res2,
+#                               clus.corrected.only.temperature = res3) %>% 
+#   mutate(Depth = design$Depth)
+# 
+# ddata <- gather(depth_data, key = "Clustering", value = "Group", clus.raw:clus.corrected.only.temperature)
+# 
+# ggplot(ddata, aes(x = Group, y = Depth, group = Group)) + geom_boxplot() + facet_wrap(~Clustering, ncol = 3)
+
 ################################### Representation graphique : longitude en fonction de latitude
 
 ######### Premiere facon
@@ -589,7 +618,7 @@ newmap <- getMap(resolution = "li")
 
 color = c()
 labels = c()
-cl = res3
+cl = res2
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
@@ -667,6 +696,12 @@ for(i in 1:length(res4)){
 ggmap(sq_map) + geom_point(data = gps, mapping = aes(x = gps$Mean_longitude, y = gps$Mean_latitude), color = color, pch = 17, cex = 2) # +
   #geom_text(data = gps, aes(label = rownames(gps)), angle = 60, hjust = 0, color = "yellow")
 
+
+######## Plot of two distance matrices
+
+plot(as.dist(D),as.dist(D_without_MDS1),xlab="Distances brutes",ylab="Distances prédites",pch=16,col="blue", main="Toutes les covariables",cex.main=1.8,cex.lab=1.3)
+plot(as.dist(D),as.dist(D_without_MDS2),xlab="Distances brutes",ylab="Distances prédites",pch=16,col="blue", main="Temperature uniquement",cex.main=1.8,cex.lab=1.3)
+plot(as.dist(D),as.dist(lagrangien),xlab="Distances brutes",ylab="Distances Lagrangiennes",pch=16,col="blue",cex.lab=1.3)
 
 library(ggplot2)
 library(reshape2)

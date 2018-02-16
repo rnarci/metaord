@@ -1247,13 +1247,14 @@ v2 = H[1,]%*%G%*%H[,1]
 # Essai 2 
 
 Y_hat = H%*%Y 
-D1 = matrix(NA,4,4)
-
-for(i in 1:4){
-  for(j in 1:4){
-    D1[i,j] = sum((Y_hat[i,]-Y_hat[j,])^2)    
-  }
-}
+R = Y - Y_hat
+# D1 = matrix(NA,4,4)
+# 
+# for(i in 1:4){
+#   for(j in 1:4){
+#     D1[i,j] = sum((Y_hat[i,]-Y_hat[j,])^2)    
+#   }
+# }
 
 D2 = matrix(NA,4,4)
 
@@ -1263,8 +1264,40 @@ for(i in 1:4){
   }
 }
 
+I = diag(rep(1,n))
+D1 = matrix(NA,4,4)
 
+for(i in 1:4){
+  for(j in 1:4){
+    D1[i,j] = (I-H)[i,]%*%G%*%(I-H)[,i] + (I-H)[j,]%*%G%*%(I-H)[,j] - 2*(I-H)[i,]%*%G%*%(I-H)[,j]
+  }
+}
 
+######## D_R en fonction de D_P, G et H
+
+test = matrix(NA,4,4)
+test1 = matrix(NA,4,4)
+test2 = matrix(NA,4,4)
+
+for(i in 1:4){
+  for(j in 1:4){
+    # test[i,j] = G[i,i] + G[j,j] -2*G[i,j] + D2[i,j] + 2*(H[i,]-H[j,])%*%(G[j,]-G[i,])
+    test[i,j] = D[i,j]^2 + D2[i,j] + 2*(H[i,]-H[j,])%*%(G[j,]-G[i,])
+  }
+}
+
+D_R = matrix(NA,4,4)
+D_P = matrix(NA,4,4)
+
+for(i in 1:4){
+  for(j in 1:4){
+    # test1[i,j] = D1[i,j] + D2[i,j]
+    # test2[i,j] = D1[i,j] - D2[i,j] - 2*(H[i,]-H[j,])%*%(G[j,]-G[i,])
+    D_R[i,j] = D1[i,j] 
+    D_P[i,j] = -D2[i,j] - 2*(H[i,]-H[j,])%*%(G[j,]-G[i,])
+  }
+}
+test = D_R + D_P # test = D^2
 
 
 ######### Distances entre résidus
@@ -1578,4 +1611,272 @@ sq_map <- get_map(location = sbbox, maptype = "watercolor", source = "google")
 
 ggmap(sq_map) + geom_point(data = gps, mapping = aes(x = gps$lon, y = gps$lat), color = "red") +
   #geom_text(data = gps, aes(label = rownames(gps)), angle = 60, hjust = 0, color = "yellow")
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+RI[1,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",1,sep=""))), 
+           rand.index(get(paste("resS",1,sep="")),get(paste("resS",1,sep=""))), 
+           rand.index(get(paste("resB",1,sep="")),get(paste("resB",1,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resS",1,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resB",1,sep=""))),
+           rand.index(get(paste("resS",1,sep="")),get(paste("resB",1,sep=""))))
+
+RI[2,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",2,sep=""))), 
+           rand.index(get(paste("resS",1,sep="")),get(paste("resS",2,sep=""))), 
+           rand.index(get(paste("resB",1,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resS",2,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resS",1,sep="")),get(paste("resB",2,sep=""))))
+
+RI[3,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",3,sep=""))), 
+           rand.index(get(paste("resS",1,sep="")),get(paste("resS",3,sep=""))), 
+           rand.index(get(paste("resB",1,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resS",3,sep=""))),
+           rand.index(get(paste("resJ",1,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resS",1,sep="")),get(paste("resB",3,sep=""))))
+
+RI[4,] = c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",2,sep=""))), 
+           rand.index(get(paste("resS",2,sep="")),get(paste("resS",2,sep=""))), 
+           rand.index(get(paste("resB",2,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resS",2,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resB",2,sep=""))),
+           rand.index(get(paste("resS",2,sep="")),get(paste("resB",2,sep=""))))
+
+RI[5,] = c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",3,sep=""))), 
+           rand.index(get(paste("resS",2,sep="")),get(paste("resS",3,sep=""))), 
+           rand.index(get(paste("resB",2,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resS",3,sep=""))),
+           rand.index(get(paste("resJ",2,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resS",2,sep="")),get(paste("resB",3,sep=""))))
+
+RI[6,] = c(rand.index(get(paste("resJ",3,sep="")),get(paste("resJ",3,sep=""))), 
+           rand.index(get(paste("resS",3,sep="")),get(paste("resS",3,sep=""))), 
+           rand.index(get(paste("resB",3,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resJ",3,sep="")),get(paste("resS",3,sep=""))),
+           rand.index(get(paste("resJ",3,sep="")),get(paste("resB",3,sep=""))),
+           rand.index(get(paste("resS",3,sep="")),get(paste("resB",3,sep=""))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+RI[1,] = c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",1,sep=""))), 
+           rand.index(get(paste("resO",1,sep="")),get(paste("resO",1,sep=""))), 
+           rand.index(get(paste("resW",1,sep="")),get(paste("resW",1,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resO",1,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resW",1,sep=""))),
+           rand.index(get(paste("resO",1,sep="")),get(paste("resW",1,sep=""))))
+
+RI[2,] = c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",2,sep=""))), 
+           rand.index(get(paste("resO",1,sep="")),get(paste("resO",2,sep=""))), 
+           rand.index(get(paste("resW",1,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resO",2,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resO",1,sep="")),get(paste("resW",2,sep=""))))
+
+RI[3,] = c(rand.index(get(paste("resK",1,sep="")),get(paste("resK",3,sep=""))), 
+           rand.index(get(paste("resO",1,sep="")),get(paste("resO",3,sep=""))), 
+           rand.index(get(paste("resW",1,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resO",3,sep=""))),
+           rand.index(get(paste("resK",1,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resO",1,sep="")),get(paste("resW",3,sep=""))))
+
+RI[4,] = c(rand.index(get(paste("resK",2,sep="")),get(paste("resK",2,sep=""))), 
+           rand.index(get(paste("resO",2,sep="")),get(paste("resO",2,sep=""))), 
+           rand.index(get(paste("resW",2,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resO",2,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resW",2,sep=""))),
+           rand.index(get(paste("resO",2,sep="")),get(paste("resW",2,sep=""))))
+
+RI[5,] = c(rand.index(get(paste("resK",2,sep="")),get(paste("resK",3,sep=""))), 
+           rand.index(get(paste("resO",2,sep="")),get(paste("resO",3,sep=""))), 
+           rand.index(get(paste("resW",2,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resO",3,sep=""))),
+           rand.index(get(paste("resK",2,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resO",2,sep="")),get(paste("resW",3,sep=""))))
+
+RI[6,] = c(rand.index(get(paste("resK",3,sep="")),get(paste("resK",3,sep=""))), 
+           rand.index(get(paste("resO",3,sep="")),get(paste("resO",3,sep=""))), 
+           rand.index(get(paste("resW",3,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resK",3,sep="")),get(paste("resO",3,sep=""))),
+           rand.index(get(paste("resK",3,sep="")),get(paste("resW",3,sep=""))),
+           rand.index(get(paste("resO",3,sep="")),get(paste("resW",3,sep=""))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##################################### Quelques tests sur la profondeur : Depth
+
+rm(list=objects())
+
+library(vegan)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+
+
+############################################################ Source custom scripts
+
+source('~/metaord/utils.R')
+
+############################################################ Design
+
+data.wd <- "/home/rnarci/Bureau/CDDrnarci/Donnees/"
+design = read.table(file=file.path(data.wd, "param_bioadvection.csv"),sep="",header=TRUE)
+rownames(design) <- design$Sample
+
+############################################################ Import longitude and latitude of the stations
+
+gps = read.table(file=file.path(data.wd,"GPScoordinates2.csv"),header=TRUE,sep="")
+rownames(gps) <- gps$Station
+
+############################################################ Lagrangian distances
+
+lagrangien = read.table(file=file.path(data.wd,"tarrive_min_surface_1000.csv"),header=TRUE, sep="")
+colnames(lagrangien) <- rownames(lagrangien)
+
+############################################################ Import data
+
+size_fraction1 = "0-0.2"
+size_fraction2 = "0.22-3"
+size_fraction3 = "0.8-5"
+size_fraction4 = "5-20"
+size_fraction5 = "20-180"
+size_fraction6 = "180-2000"
+
+import_data(size_fraction6, samples = rownames(design))
+
+############################################################ Subset design and (longitude,latitude)
+
+design <- design[metagenomic_sample, ]
+design <- design[,-c(1,6,7)]
+# design <- design[,-c(1,5,6,7,13)]
+
+gps <- gps[metagenomic_sample,]
+gps <- gps[,-1]
+
+lagrangien = lagrangien[metagenomic_sample,metagenomic_sample]
+
+library(mice)
+mice = complete(mice(design,method="norm.predict",m=1))
+design$Phosphates = mice$Phosphates
+design$NO2NO3 = mice$NO2NO3
+
+design[,c(12,13)] = c(gps$Mean_latitude,gps$Mean_longitude)
+colnames(design)[c(12,13)] = c("Latitude","Longitude")
+
+library(loe)
+library(fcd)
+library(clues)
+
+D = jaccard_abundance
+n = dim(D)[1]
+
+parms1 = c(design$Depth)
+X1 = matrix(parms1,nrow=n,ncol=1)
+
+H1 = X1%*%solve(t(X1)%*%X1)%*%t(X1)
+
+D_without_MDS1 = matrix(NA,n,n)
+
+J = diag(rep(1,n)) - matrix(1,n,n)/n
+G = -0.5*J%*%D^2%*%J
+
+for(i in 1:n){
+  for(j in 1:n){
+    D_without_MDS1[i,j] = sqrt(H1[i,]%*%G%*%H1[,i] + H1[j,]%*%G%*%H1[,j] - 2*H1[i,]%*%G%*%H1[,j])
+  }
+}
+
+l = 2
+
+# result_cmdscale = matrix(NA,48,2)
+# 
+# for(k1 in 3:50){
+#   fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=k1)
+#   res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
+#   result_cmdscale[k1-2,1] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res2==1]) - sum(str_detect(metagenomic_sample,"DCM")[res2==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+# 
+#   fit2bis = cmdscale(D, eig=TRUE, k=k1)
+#   res2bis = kmeans(fit2bis$points,l, nstart = 1000)$cluster
+#   result_cmdscale[k1-2,2] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res2bis==1]) - sum(str_detect(metagenomic_sample,"DCM")[res2bis==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+# 
+#   cat(sprintf("Itération %s \n",k1-2))
+# }
+# result_cmdscale
+# mean(result_cmdscale[,1])
+# mean(result_cmdscale[,2])
+
+result_kNNG = matrix(NA,58,2)
+
+for(k2 in 3:60){
+  kNN2 = make.kNNG(D_without_MDS1, k = k2, symm = TRUE, weight = FALSE)
+  res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  result_kNNG[k2-2,1] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res5==1]) - sum(str_detect(metagenomic_sample,"DCM")[res5==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+
+  kNN2bis = make.kNNG(D, k = k2, symm = TRUE, weight = FALSE)
+  res5bis = spectral.clustering(kNN2bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  result_kNNG[k2-2,2] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res5bis==1]) - sum(str_detect(metagenomic_sample,"DCM")[res5bis==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+
+  cat(sprintf("Itération %s \n",k2-2))
+}
+result_kNNG
+mean(result_kNNG[,1])
+mean(result_kNNG[,2])
 
