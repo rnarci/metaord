@@ -36,7 +36,7 @@ size_fraction4 = "5-20"
 size_fraction5 = "20-180"
 size_fraction6 = "180-2000"
 
-import_data(size_fraction3, samples = rownames(design))
+import_data(size_fraction1, samples = rownames(design))
 
 ############################################################ Subset design and (longitude,latitude)
 
@@ -378,9 +378,9 @@ Y_tilde = cmdscale(D, k = n - 1)
 
 # parms1 = c(design$Temperature,design$SSD,design$SI_temperature,design$Depth,design$Silicate,design$SI_nitrates)
 # X1 = matrix(parms1,nrow=n,ncol=6)
-parms1 = c(design$Depth)
+parms1 = design$Depth
 X1 = matrix(parms1,nrow=n,ncol=1)
-parms2 = design$Temperature
+parms2 = design$Longitude
 X2 = matrix(parms2,nrow=n,ncol=1)
 
 H1 = X1%*%solve(t(X1)%*%X1)%*%t(X1)
@@ -435,9 +435,9 @@ res1 = kmeans(fit1$points,l, nstart = 1000)$cluster
 res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
 res3 = kmeans(fit3$points,l, nstart = 1000)$cluster
 
-res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res6 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res4 = spectral.clustering.new(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res5 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res6 = spectral.clustering.new(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
 # ####### Comparaison des clusterings
 # 
@@ -559,9 +559,9 @@ res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
 res3 = kmeans(fit3$points,l, nstart = 1000)$cluster
 
 
-res4 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-res6 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res4 = spectral.clustering.new(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res5 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res6 = spectral.clustering.new(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
 
 
 # ####### Comparaison des clusterings
@@ -618,17 +618,17 @@ newmap <- getMap(resolution = "li")
 
 color = c()
 labels = c()
-cl = res2
+cl = res5
 
 for(i in 1:length(cl)){
   if(cl[i]==1){
     color[i] = "blue"
   }
   if(cl[i]==2){
-    color[i] = "gold4"
+    color[i] = "red"
   }
   if(cl[i]==3){
-    color[i] = "red"
+    color[i] = "gold4"
   }
   if(str_length(rownames(gps)[i]) == 5){
     labels[i] = substr(rownames(gps)[i],1,1)

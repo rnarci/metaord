@@ -102,9 +102,366 @@ restot1bis=matrix(0,nrow=14,ncol=2)
 
 ############################## Spectral clustering on k-NNG : similarities between clusterings are calculated from ARI.
 
+RI1 = matrix(0,length(1:60),length(2:15)) 
+RI2 = matrix(0,length(1:60),length(2:15)) 
+  
+for(k in 1:60){
+  kNN1 = make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN2 = make.kNNG(ab_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN3 = make.kNNG(braycurtis_abundance, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN4 = make.kNNG(ab_ochiai_abundance, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN5 = make.kNNG(ab_sorensen_abundance, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN6 = make.kNNG(simka_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = FALSE)
+  
+  kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+  
+  for(l in 2:15){
+    res1 = spectral.clustering.new(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res2 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res3 = spectral.clustering.new(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res4 = spectral.clustering.new(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res5 = spectral.clustering.new(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res6 = spectral.clustering.new(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res7 = spectral.clustering.new(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res8 = spectral.clustering.new(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res9 = spectral.clustering.new(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res10 = spectral.clustering.new(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res11 = spectral.clustering.new(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    res12 = spectral.clustering.new(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+    
+    for(j in 1:5){
+      for(m in (j+1):6){
+        RI1[k,l-1] = RI1[k,l-1] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+      }
+    }
+    
+    for(j in 7:11){
+      for(m in (j+1):12){
+        RI2[k,l-1] = RI2[k,l-1] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+      }
+    }
+  }
+}
+RI1 = round(RI1/15,3)
+RI2 = round(RI2/15,3)
 
-k = 35
+stock_k_RI1 = c()
+stock_l_RI1 = c()
+a = 1
+for(l in 3:15){
+  for(k in 1:60){
+    if(RI1[k,l-1] >= 0.987){
+      stock_k_RI1[a] = k
+      stock_l_RI1[a] = l-1
+      a = a + 1
+    }
+  }
+}
 
+stock_k_RI2 = c()
+stock_l_RI2 = c()
+a = 1
+for(l in 3:15){
+  for(k in 1:60){
+    if(RI2[k,l-1] > 0.998){
+      stock_k_RI2[a] = k
+      stock_l_RI2[a] = l-1
+      a = a + 1
+    }
+  }
+}
+
+result1 = matrix(NA, nrow = 10000, ncol = 9)
+iter = 1
+
+for(a1 in 1:(length(stock_k_RI1)-1)){
+  for(a2 in (a1+1):length(stock_k_RI1)){
+    if(stock_l_RI1[a1] == stock_l_RI1[a2]){
+    k1 = stock_k_RI1[a1]
+    k2 = stock_k_RI1[a2]
+    l = stock_l_RI1[a1] + 1
+    
+    kNN1 = make.kNNG(jaccard_abundance, k = k1, symm = TRUE, weight = FALSE)
+
+    kNN2 = make.kNNG(ab_jaccard_abundance, k = k1, symm = TRUE, weight = FALSE)
+
+    kNN3 = make.kNNG(braycurtis_abundance, k = k1, symm = TRUE, weight = FALSE)
+
+    kNN4 = make.kNNG(ab_ochiai_abundance, k = k1, symm = TRUE, weight = FALSE)
+
+    kNN5 = make.kNNG(ab_sorensen_abundance, k = k1, symm = TRUE, weight = FALSE)
+
+    kNN6 = make.kNNG(simka_jaccard_abundance, k = k1, symm = TRUE, weight = FALSE)
+
+    kNN1bis = make.kNNG(jaccard_abundance, k = k2, symm = TRUE, weight = FALSE)
+
+    kNN2bis = make.kNNG(ab_jaccard_abundance, k = k2, symm = TRUE, weight = FALSE)
+
+    kNN3bis = make.kNNG(braycurtis_abundance, k = k2, symm = TRUE, weight = FALSE)
+
+    kNN4bis = make.kNNG(ab_ochiai_abundance, k = k2, symm = TRUE, weight = FALSE)
+
+    kNN5bis = make.kNNG(ab_sorensen_abundance, k = k2, symm = TRUE, weight = FALSE)
+
+    kNN6bis = make.kNNG(simka_jaccard_abundance, k = k2, symm = TRUE, weight = FALSE)
+
+
+    res1 = spectral.clustering.new(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    res2 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    res3 = spectral.clustering.new(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    res4 = spectral.clustering.new(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    res5 = spectral.clustering.new(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    res6 = spectral.clustering.new(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    resbis1 = spectral.clustering.new(kNN1bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    resbis2 = spectral.clustering.new(kNN2bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    resbis3 = spectral.clustering.new(kNN3bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    resbis4 = spectral.clustering.new(kNN4bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    resbis5 = spectral.clustering.new(kNN5bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    resbis6 = spectral.clustering.new(kNN6bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+    result1[iter,1:3] = c("Abondance",sprintf("k = %s vs k = %s",k1,k2),sprintf("nb clusters = %s",l))
+
+    for(i in 1:6){
+     result1[iter,i+3] = round(rand.index(get(paste("res",i,sep="")),get(paste("resbis",i,sep=""))),3)
+    }
+
+    iter = iter + 1
+    }
+  }
+}
+
+for(a1 in 1:(length(stock_k_RI2)-1)){
+  for(a2 in (a1+1):length(stock_k_RI2)){
+    if(stock_l_RI2[a1] == stock_l_RI2[a2]){
+      k1 = stock_k_RI2[a1]
+      k2 = stock_k_RI2[a2]
+      l = stock_l_RI2[a1] + 1
+      
+      kNN7 = make.kNNG(chord_prevalence, k = k1, symm = TRUE, weight = FALSE)
+      
+      kNN8 = make.kNNG(jaccard_prevalence, k = k1, symm = TRUE, weight = FALSE)
+      
+      kNN9 = make.kNNG(kulczynski_prevalence, k = k1, symm = TRUE, weight = FALSE)
+      
+      kNN10 = make.kNNG(ochiai_prevalence, k = k1, symm = TRUE, weight = FALSE)
+      
+      kNN11 = make.kNNG(whittaker_prevalence, k = k1, symm = TRUE, weight = FALSE)
+      
+      kNN12 = make.kNNG(simka_jaccard_prevalence, k = k1, symm = TRUE, weight = FALSE)
+      
+      kNN7bis = make.kNNG(chord_prevalence, k = k2, symm = TRUE, weight = FALSE)
+      
+      kNN8bis = make.kNNG(jaccard_prevalence, k = k2, symm = TRUE, weight = FALSE)
+      
+      kNN9bis = make.kNNG(kulczynski_prevalence, k = k2, symm = TRUE, weight = FALSE)
+      
+      kNN10bis = make.kNNG(ochiai_prevalence, k = k2, symm = TRUE, weight = FALSE)
+      
+      kNN11bis = make.kNNG(whittaker_prevalence, k = k2, symm = TRUE, weight = FALSE)
+      
+      kNN12bis = make.kNNG(simka_jaccard_prevalence, k = k2, symm = TRUE, weight = FALSE)
+
+      
+      res7 = spectral.clustering.new(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      res8 = spectral.clustering.new(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      res9 = spectral.clustering.new(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      res10 = spectral.clustering.new(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      res11 = spectral.clustering.new(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      res12 = spectral.clustering.new(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      resbis7 = spectral.clustering.new(kNN7bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      resbis8 = spectral.clustering.new(kNN8bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      resbis9 = spectral.clustering.new(kNN9bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      resbis10 = spectral.clustering.new(kNN10bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      resbis11 = spectral.clustering.new(kNN11bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      resbis12 = spectral.clustering.new(kNN12bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+      
+      result1[iter,1:3] = c("Prevalence",sprintf("k = %s vs k = %s",k1,k2),sprintf("nb clusters = %s",l))
+      
+      for(i in 7:12){
+        result1[iter,i-3] = round(rand.index(get(paste("res",i,sep="")),get(paste("resbis",i,sep=""))),3)
+      }
+      
+      iter = iter + 1
+    }
+  }
+}
+
+result1 = na.omit(result1)
+result1 = as.data.frame(result1)
+write.table(x = result1, file = "result_spectral")
+
+# RI1 = as.data.frame(RI1)
+# RI2 = as.data.frame(RI2)
+# 
+# write.table(x=RI1,file="abondance_spectral")
+# write.table(x=RI2,file="prevalence_spectral")
+
+# for(k in 1:60){
+#   print(round(mean(RI1[k,]),3))
+# }
+# 
+# for(k in 1:60){
+#   print(round(mean(RI2[k,]),3))
+# }
+# 
+# RI3 = matrix(NA,length(2:15),12)
+# k1 = 14
+# k2 = 26
+# 
+# kNN1 = make.kNNG(jaccard_abundance, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN2 = make.kNNG(ab_jaccard_abundance, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN3 = make.kNNG(braycurtis_abundance, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN4 = make.kNNG(ab_ochiai_abundance, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN5 = make.kNNG(ab_sorensen_abundance, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN6 = make.kNNG(simka_jaccard_abundance, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN7 = make.kNNG(chord_prevalence, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN8 = make.kNNG(jaccard_prevalence, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN9 = make.kNNG(kulczynski_prevalence, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN10 = make.kNNG(ochiai_prevalence, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN11 = make.kNNG(whittaker_prevalence, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN12 = make.kNNG(simka_jaccard_prevalence, k = k1, symm = TRUE, weight = FALSE)
+# 
+# kNN1bis = make.kNNG(jaccard_abundance, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN2bis = make.kNNG(ab_jaccard_abundance, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN3bis = make.kNNG(braycurtis_abundance, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN4bis = make.kNNG(ab_ochiai_abundance, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN5bis = make.kNNG(ab_sorensen_abundance, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN6bis = make.kNNG(simka_jaccard_abundance, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN7bis = make.kNNG(chord_prevalence, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN8bis = make.kNNG(jaccard_prevalence, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN9bis = make.kNNG(kulczynski_prevalence, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN10bis = make.kNNG(ochiai_prevalence, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN11bis = make.kNNG(whittaker_prevalence, k = k2, symm = TRUE, weight = FALSE)
+# 
+# kNN12bis = make.kNNG(simka_jaccard_prevalence, k = k2, symm = TRUE, weight = FALSE)
+# 
+# for(l in 2:15){
+# res1 = spectral.clustering.new(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res2 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res3 = spectral.clustering.new(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res4 = spectral.clustering.new(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res5 = spectral.clustering.new(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res6 = spectral.clustering.new(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res7 = spectral.clustering.new(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res8 = spectral.clustering.new(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res9 = spectral.clustering.new(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res10 = spectral.clustering.new(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res11 = spectral.clustering.new(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#   
+# res12 = spectral.clustering.new(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis1 = spectral.clustering.new(kNN1bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis2 = spectral.clustering.new(kNN2bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis3 = spectral.clustering.new(kNN3bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis4 = spectral.clustering.new(kNN4bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis5 = spectral.clustering.new(kNN5bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis6 = spectral.clustering.new(kNN6bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis7 = spectral.clustering.new(kNN7bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis8 = spectral.clustering.new(kNN8bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis9 = spectral.clustering.new(kNN9bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis10 = spectral.clustering.new(kNN10bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis11 = spectral.clustering.new(kNN11bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# resbis12 = spectral.clustering.new(kNN12bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# 
+# for(i in 1:12){
+#  RI3[l-1,i] = round(rand.index(get(paste("res",i,sep="")),get(paste("resbis",i,sep=""))),3)
+# }
+# 
+# }
+# 
+# RI3 = as.data.frame(RI3)
+# write.table(x=RI3,file="comp_spectral")
 
 # kNN1 = make.kNNG(jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
 # 
@@ -117,142 +474,299 @@ k = 35
 # kNN5 = make.kNNG(ab_sorensen_abundance, k = k, symm = TRUE, weight = FALSE)
 # 
 # kNN6 = make.kNNG(simka_jaccard_abundance, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
+# 
+# l = 8
+# 
+# res1 = spectral.clustering.new(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res2 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res3 = spectral.clustering.new(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res4 = spectral.clustering.new(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res5 = spectral.clustering.new(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res6 = spectral.clustering.new(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res7 = spectral.clustering.new(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res8 = spectral.clustering.new(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res9 = spectral.clustering.new(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res10 = spectral.clustering.new(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res11 = spectral.clustering.new(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# res12 = spectral.clustering.new(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+# 
+# RI1 = matrix(NA,6,6)
 
-kNN7 = make.kNNG(chord_prevalence, k = k, symm = TRUE, weight = FALSE)
+# for(j in 1:6){
+#   for(m in 1:6){
+#     RI1[j,m] = rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+#   }
+# }
+# View(RI1)
+# 
+# 
+# RI2 = matrix(NA,6,6)
+# 
+# for(j in 7:12){
+#   for(m in 7:12){
+#     RI2[j-6,m-6] = rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+#   }
+# }
+# View(RI2)
 
-kNN8 = make.kNNG(jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
-
-kNN9 = make.kNNG(kulczynski_prevalence, k = k, symm = TRUE, weight = FALSE)
-
-kNN10 = make.kNNG(ochiai_prevalence, k = k, symm = TRUE, weight = FALSE)
-
-kNN11 = make.kNNG(whittaker_prevalence, k = k, symm = TRUE, weight = FALSE)
-
-kNN12 = make.kNNG(simka_jaccard_prevalence, k = k, symm = TRUE, weight = FALSE)
-
-for(l in 2:15)
-{
-  
-  ARI1=rep(0,100)
-  RI1 = rep(0,100)
-  
-  for(nb_run in 1:100)
-  {
-    # res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    # 
-    # res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    # 
-    # res3 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    # 
-    # res4 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    # 
-    # res5 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    # 
-    # res6 = spectral.clustering(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    res7 = spectral.clustering.rw(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    res8 = spectral.clustering.rw(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    res9 = spectral.clustering.rw(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    res10 = spectral.clustering.rw(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    res11 = spectral.clustering.rw(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    res12 = spectral.clustering.rw(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-    
-    # res1 = specc(kNN7, centers=l)[1:140]
-    # 
-    # res2 = specc(kNN8,centers=l)[1:140]
-    # 
-    # res3 = specc(kNN9, centers=l)[1:140]
-    # 
-    # res4 = specc(kNN10, centers=l)[1:140]
-    # 
-    # res5 = specc(kNN11, centers=l)[1:140]
-    # 
-    # res6 = specc(kNN12, centers=l)[1:140]
-    
-    # res7 = specc(kNN7, centers=l)[1:140]
-    # 
-    # res8 = specc(kNN8,centers=l)[1:140]
-    # 
-    # res9 = specc(kNN9, centers=l)[1:140]
-    # 
-    # res10 = specc(kNN10, centers=l)[1:140]
-    # 
-    # res11 = specc(kNN11, centers=l)[1:140]
-    # 
-    # res12 = specc(kNN12, centers=l)[1:140]
-    
-    
-    for(j in 7:11){
-      for(m in (j+1):12){
-        ARI1[nb_run] = ARI1[nb_run] + adjustedRand(get(paste("res",j,sep="")),get(paste("res",m,sep="")),randMethod="Rand")
-        RI1[nb_run] = RI1[nb_run] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
-      }
-    }
-    
-    
-    ARI1[nb_run] = ARI1[nb_run]/15
-    RI1[nb_run] = RI1[nb_run]/15
-  }
-  
-  restot1[l-1,1] = max(ARI1)
-  restot1[l-1,2] = max(RI1)
-  
-}
+# ARI1 = rep(0,length(2:15))
+# RI1 = rep(0,length(2:15))
+# 
+# for(l in 2:15)
+# {
+#     # res1 = spectral.clustering(kNN1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     # 
+#     # res2 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     # 
+#     # res3 = spectral.clustering(kNN3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     # 
+#     # res4 = spectral.clustering(kNN4, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     # 
+#     # res5 = spectral.clustering(kNN5, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     # 
+#     # res6 = spectral.clustering(kNN6, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     res7 = spectral.clustering.new(kNN7, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     res8 = spectral.clustering.new(kNN8, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     res9 = spectral.clustering.new(kNN9, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     res10 = spectral.clustering.new(kNN10, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     res11 = spectral.clustering.new(kNN11, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     res12 = spectral.clustering.new(kNN12, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+#     
+#     # res1 = specc(kNN7, centers=l)[1:140]
+#     # 
+#     # res2 = specc(kNN8,centers=l)[1:140]
+#     # 
+#     # res3 = specc(kNN9, centers=l)[1:140]
+#     # 
+#     # res4 = specc(kNN10, centers=l)[1:140]
+#     # 
+#     # res5 = specc(kNN11, centers=l)[1:140]
+#     # 
+#     # res6 = specc(kNN12, centers=l)[1:140]
+#     
+#     # res7 = specc(kNN7, centers=l)[1:140]
+#     # 
+#     # res8 = specc(kNN8,centers=l)[1:140]
+#     # 
+#     # res9 = specc(kNN9, centers=l)[1:140]
+#     # 
+#     # res10 = specc(kNN10, centers=l)[1:140]
+#     # 
+#     # res11 = specc(kNN11, centers=l)[1:140]
+#     # 
+#     # res12 = specc(kNN12, centers=l)[1:140]
+#     
+#     
+#     for(j in 7:11){
+#       for(m in (j+1):12){
+#         ARI1[l-1] = ARI1[l-1] + adjustedRand(get(paste("res",j,sep="")),get(paste("res",m,sep="")),randMethod="Rand")
+#         RI1[l-1] = RI1[l-1] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+#       }
+#     }
+#     
+#   }
+#   
+# ARI1 = ARI1/15
+# RI1 = RI1/15
+#   
 
 
 
 ############################## MDS + k-means
 
+RI1 = matrix(0,length(1:60),length(2:15)) 
+RI2 = matrix(0,length(1:60),length(2:15)) 
 
-for(l in 2:15){
-  ARI1bis=matrix(0,100,10)
-  RI1bis = matrix(0,100,10)
-  for(k in 1:10){
+for(k in 1:60){
+  fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k)
+  fit2 = cmdscale(ab_jaccard_abundance,eig=TRUE, k=k)
+  fit3 = cmdscale(braycurtis_abundance,eig=TRUE, k=k)
+  fit4 = cmdscale(ab_ochiai_abundance,eig=TRUE, k=k)
+  fit5 = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k)
+  fit6 = cmdscale(simka_jaccard_abundance,eig=TRUE, k=k)
+  fit7 = cmdscale(chord_prevalence,eig=TRUE, k=k)
+  fit8 = cmdscale(jaccard_prevalence,eig=TRUE, k=k)
+  fit9 = cmdscale(kulczynski_prevalence,eig=TRUE, k=k)
+  fit10 = cmdscale(ochiai_prevalence,eig=TRUE, k=k)
+  fit11 = cmdscale(whittaker_prevalence,eig=TRUE, k=k)
+  fit12 = cmdscale(simka_jaccard_prevalence,eig=TRUE, k=k)
+  
+  for(l in 2:15){
+          res1 = kmeans(fit1$points,l,nstart = 1000)$cluster
+
+          res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
+
+          res3 = kmeans(fit3$points,l,nstart = 1000)$cluster
+
+          res4 = kmeans(fit4$points,l,nstart = 1000)$cluster
+
+          res5 = kmeans(fit5$points,l,nstart = 1000)$cluster
+
+          res6 = kmeans(fit6$points,l,nstart = 1000)$cluster
+
+          res7 = kmeans(fit7$points,l,nstart = 1000)$cluster
+
+          res8 = kmeans(fit8$points,l,nstart = 1000)$cluster
+
+          res9 = kmeans(fit9$points,l,nstart = 1000)$cluster
+
+          res10 = kmeans(fit10$points,l,nstart = 1000)$cluster
+
+          res11 = kmeans(fit11$points,l,nstart = 1000)$cluster
+
+          res12 = kmeans(fit12$points,l,nstart = 1000)$cluster
     
-    # fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k)
-    # 
-    # fit2 = cmdscale(ab_jaccard_abundance,eig=TRUE, k=k)
-    # 
-    # fit3 = cmdscale(braycurtis_abundance,eig=TRUE, k=k)
-    # 
-    # fit4 = cmdscale(ab_ochiai_abundance,eig=TRUE, k=k)
-    # 
-    # fit5 = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k)
-    # 
-    # fit6 = cmdscale(simka_jaccard_abundance,eig=TRUE, k=k)
+    for(j in 1:5){
+      for(m in (j+1):6){
+        RI1[k,l-1] = RI1[k,l-1] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+      }
+    }
     
-    fit7 = cmdscale(chord_prevalence,eig=TRUE, k=k)
-    
-    fit8 = cmdscale(jaccard_prevalence,eig=TRUE, k=k)
-    
-    fit9 = cmdscale(kulczynski_prevalence,eig=TRUE, k=k)
-    
-    fit10 = cmdscale(ochiai_prevalence,eig=TRUE, k=k)
-    
-    fit11 = cmdscale(whittaker_prevalence,eig=TRUE, k=k)
-    
-    fit12 = cmdscale(simka_jaccard_prevalence,eig=TRUE, k=k)
-    
-    
-    
-    for(nb_run in 1:100)
-    {
-      # res1 = kmeans(fit1$points,l,nstart = 1000)$cluster
-      # 
-      # res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
-      # 
-      # res3 = kmeans(fit3$points,l,nstart = 1000)$cluster
-      # 
-      # res4 = kmeans(fit4$points,l,nstart = 1000)$cluster
-      # 
-      # res5 = kmeans(fit5$points,l,nstart = 1000)$cluster
-      # 
-      # res6 = kmeans(fit6$points,l,nstart = 1000)$cluster
+    for(j in 7:11){
+      for(m in (j+1):12){
+        RI2[k,l-1] = RI2[k,l-1] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+      }
+    }
+  }
+}
+RI1 = round(RI1/15,3)
+RI2 = round(RI2/15,3)
+
+stock_k_RI1 = c()
+stock_l_RI1 = c()
+a = 1
+for(l in 3:15){
+  for(k in 1:60){
+    if(RI1[k,l-1] >= 0.986){
+      stock_k_RI1[a] = k
+      stock_l_RI1[a] = l-1
+      a = a + 1
+    }
+  }
+}
+
+stock_k_RI2 = c()
+stock_l_RI2 = c()
+a = 1
+for(l in 3:15){
+  for(k in 1:60){
+    if(RI2[k,l-1] > 0.996){
+      stock_k_RI2[a] = k
+      stock_l_RI2[a] = l-1
+      a = a + 1
+    }
+  }
+}
+
+result2 = matrix(NA, nrow = 10000, ncol = 9)
+iter = 1
+
+for(a1 in 1:(length(stock_k_RI1)-1)){
+  for(a2 in (a1+1):length(stock_k_RI1)){
+    if(stock_l_RI1[a1] == stock_l_RI1[a2]){
+      k1 = stock_k_RI1[a1]
+      k2 = stock_k_RI1[a2]
+      l = stock_l_RI1[a1] + 1
+      
+      fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k1)
+      fit2 = cmdscale(ab_jaccard_abundance,eig=TRUE, k=k1)
+      fit3 = cmdscale(braycurtis_abundance,eig=TRUE, k=k1)
+      fit4 = cmdscale(ab_ochiai_abundance,eig=TRUE, k=k1)
+      fit5 = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k1)
+      fit6 = cmdscale(simka_jaccard_abundance,eig=TRUE, k=k1)
+      
+      fit1bis = cmdscale(jaccard_abundance, eig=TRUE, k=k2)
+      fit2bis = cmdscale(ab_jaccard_abundance,eig=TRUE, k=k2)
+      fit3bis = cmdscale(braycurtis_abundance,eig=TRUE, k=k2)
+      fit4bis = cmdscale(ab_ochiai_abundance,eig=TRUE, k=k2)
+      fit5bis = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k2)
+      fit6bis = cmdscale(simka_jaccard_abundance,eig=TRUE, k=k2)
+                          
+      res1 = kmeans(fit1$points,l,nstart = 1000)$cluster
+                          
+      res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
+                          
+      res3 = kmeans(fit3$points,l,nstart = 1000)$cluster
+                          
+      res4 = kmeans(fit4$points,l,nstart = 1000)$cluster
+                          
+      res5 = kmeans(fit5$points,l,nstart = 1000)$cluster
+                          
+      res6 = kmeans(fit6$points,l,nstart = 1000)$cluster
+                          
+      resbis1 = kmeans(fit1bis$points,l,nstart = 1000)$cluster
+                          
+      resbis2 = kmeans(fit2bis$points,l,nstart = 1000)$cluster
+                          
+      resbis3 = kmeans(fit3bis$points,l,nstart = 1000)$cluster
+                          
+      resbis4 = kmeans(fit4bis$points,l,nstart = 1000)$cluster
+                          
+      resbis5 = kmeans(fit5bis$points,l,nstart = 1000)$cluster
+                          
+      resbis6 = kmeans(fit6bis$points,l,nstart = 1000)$cluster
+
+      result2[iter,1:3] = c("Abondance",sprintf("k = %s vs k = %s",k1,k2),sprintf("nb clusters = %s",l))
+      
+      for(i in 1:6){
+        result2[iter,i+3] = round(rand.index(get(paste("res",i,sep="")),get(paste("resbis",i,sep=""))),3)
+      }
+      
+      iter = iter + 1
+    }
+  }
+}
+
+for(a1 in 1:(length(stock_k_RI2)-1)){
+  for(a2 in (a1+1):length(stock_k_RI2)){
+    if(stock_l_RI2[a1] == stock_l_RI2[a2]){
+      k1 = stock_k_RI2[a1]
+      k2 = stock_k_RI2[a2]
+      l = stock_l_RI2[a1] + 1
+      
+      fit7 = cmdscale(chord_prevalence,eig=TRUE, k=k1)
+      fit8 = cmdscale(jaccard_prevalence,eig=TRUE, k=k1)
+      fit9 = cmdscale(kulczynski_prevalence,eig=TRUE, k=k1)
+      fit10 = cmdscale(ochiai_prevalence,eig=TRUE, k=k1)
+      fit11 = cmdscale(whittaker_prevalence,eig=TRUE, k=k1)
+      fit12 = cmdscale(simka_jaccard_prevalence,eig=TRUE, k=k1)
+      
+      fit7bis = cmdscale(chord_prevalence,eig=TRUE, k=k2)
+      fit8bis = cmdscale(jaccard_prevalence,eig=TRUE, k=k2)
+      fit9bis = cmdscale(kulczynski_prevalence,eig=TRUE, k=k2)
+      fit10bis = cmdscale(ochiai_prevalence,eig=TRUE, k=k2)
+      fit11bis = cmdscale(whittaker_prevalence,eig=TRUE, k=k2)
+      fit12bis = cmdscale(simka_jaccard_prevalence,eig=TRUE, k=k2)
+      
       
       res7 = kmeans(fit7$points,l,nstart = 1000)$cluster
       
@@ -261,30 +775,217 @@ for(l in 2:15){
       res9 = kmeans(fit9$points,l,nstart = 1000)$cluster
       
       res10 = kmeans(fit10$points,l,nstart = 1000)$cluster
-      
+    
       res11 = kmeans(fit11$points,l,nstart = 1000)$cluster
       
       res12 = kmeans(fit12$points,l,nstart = 1000)$cluster
       
+      resbis7 = kmeans(fit7bis$points,l,nstart = 1000)$cluster
       
+      resbis8 = kmeans(fit8bis$points,l,nstart = 1000)$cluster
       
-      for(j in 7:11){
-        for(m in (j+1):12){
-          ARI1bis[nb_run,k] = ARI1bis[nb_run,k] + adjustedRand(get(paste("res",j,sep="")),get(paste("res",m,sep="")),randMethod="Rand")
-          RI1bis[nb_run,k] = RI1bis[nb_run,k] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
-        }
+      resbis9 = kmeans(fit9bis$points,l,nstart = 1000)$cluster
+      
+      resbis10 = kmeans(fit10bis$points,l,nstart = 1000)$cluster
+      
+      resbis11 = kmeans(fit11bis$points,l,nstart = 1000)$cluster
+      
+      resbis12 = kmeans(fit12bis$points,l,nstart = 1000)$cluster
+      
+      result2[iter,1:3] = c("Prevalence",sprintf("k = %s vs k = %s",k1,k2),sprintf("nb clusters = %s",l))
+      
+      for(i in 7:12){
+        result2[iter,i-3] = round(rand.index(get(paste("res",i,sep="")),get(paste("resbis",i,sep=""))),3)
       }
       
-      
-      ARI1bis[nb_run,k] = ARI1bis[nb_run,k]/15
-      RI1bis[nb_run,k] = RI1bis[nb_run,k]/15
+      iter = iter + 1
     }
-    
-    
   }
-  restot1bis[l-1,1] = max(ARI1bis)
-  restot1bis[l-1,2] = max(RI1bis)
 }
+
+result2 = na.omit(result2)
+result2 = as.data.frame(result2)
+write.table(x = result2, file = "result_kmeans")
+
+# for(k in 1:60){
+#   print(round(mean(RI1[k,]),3))
+# }
+# 
+# for(k in 1:60){
+#   print(round(mean(RI2[k,]),3))
+# }
+
+# RI1 = as.data.frame(RI1)
+# RI2 = as.data.frame(RI2)
+
+# write.table(x=RI1,file="abondance_kmeans")
+# write.table(x=RI2,file="prevalence_kmeans")
+
+# RI3 = matrix(NA,length(2:15),12)
+# k1 = 1
+# k2 = 26
+# 
+# fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k1)
+# fit2 = cmdscale(ab_jaccard_abundance,eig=TRUE, k=k1)
+# fit3 = cmdscale(braycurtis_abundance,eig=TRUE, k=k1)
+# fit4 = cmdscale(ab_ochiai_abundance,eig=TRUE, k=k1)
+# fit5 = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k1)
+# fit6 = cmdscale(simka_jaccard_abundance,eig=TRUE, k=k1)
+# fit7 = cmdscale(chord_prevalence,eig=TRUE, k=k1)
+# fit8 = cmdscale(jaccard_prevalence,eig=TRUE, k=k1)
+# fit9 = cmdscale(kulczynski_prevalence,eig=TRUE, k=k1)
+# fit10 = cmdscale(ochiai_prevalence,eig=TRUE, k=k1)
+# fit11 = cmdscale(whittaker_prevalence,eig=TRUE, k=k1)
+# fit12 = cmdscale(simka_jaccard_prevalence,eig=TRUE, k=k1)
+# 
+# fit1bis = cmdscale(jaccard_abundance, eig=TRUE, k=k2)
+# fit2bis = cmdscale(ab_jaccard_abundance,eig=TRUE, k=k2)
+# fit3bis = cmdscale(braycurtis_abundance,eig=TRUE, k=k2)
+# fit4bis = cmdscale(ab_ochiai_abundance,eig=TRUE, k=k2)
+# fit5bis = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k2)
+# fit6bis = cmdscale(simka_jaccard_abundance,eig=TRUE, k=k2)
+# fit7bis = cmdscale(chord_prevalence,eig=TRUE, k=k2)
+# fit8bis = cmdscale(jaccard_prevalence,eig=TRUE, k=k2)
+# fit9bis = cmdscale(kulczynski_prevalence,eig=TRUE, k=k2)
+# fit10bis = cmdscale(ochiai_prevalence,eig=TRUE, k=k2)
+# fit11bis = cmdscale(whittaker_prevalence,eig=TRUE, k=k2)
+# fit12bis = cmdscale(simka_jaccard_prevalence,eig=TRUE, k=k2)
+# 
+# for(l in 2:15){
+  # res1 = kmeans(fit1$points,l,nstart = 1000)$cluster
+  # 
+  # res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
+  # 
+  # res3 = kmeans(fit3$points,l,nstart = 1000)$cluster
+  # 
+  # res4 = kmeans(fit4$points,l,nstart = 1000)$cluster
+  # 
+  # res5 = kmeans(fit5$points,l,nstart = 1000)$cluster
+  # 
+  # res6 = kmeans(fit6$points,l,nstart = 1000)$cluster
+  # 
+  # res7 = kmeans(fit7$points,l,nstart = 1000)$cluster
+  # 
+  # res8 = kmeans(fit8$points,l,nstart = 1000)$cluster
+  # 
+  # res9 = kmeans(fit9$points,l,nstart = 1000)$cluster
+  # 
+  # res10 = kmeans(fit10$points,l,nstart = 1000)$cluster
+  # 
+  # res11 = kmeans(fit11$points,l,nstart = 1000)$cluster
+  # 
+  # res12 = kmeans(fit12$points,l,nstart = 1000)$cluster
+  # 
+  # resbis1 = kmeans(fit1bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis2 = kmeans(fit2bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis3 = kmeans(fit3bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis4 = kmeans(fit4bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis5 = kmeans(fit5bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis6 = kmeans(fit6bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis7 = kmeans(fit7bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis8 = kmeans(fit8bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis9 = kmeans(fit9bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis10 = kmeans(fit10bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis11 = kmeans(fit11bis$points,l,nstart = 1000)$cluster
+  # 
+  # resbis12 = kmeans(fit12bis$points,l,nstart = 1000)$cluster
+#   
+#   
+#   for(i in 1:12){
+#     RI3[l-1,i] = round(rand.index(get(paste("res",i,sep="")),get(paste("resbis",i,sep=""))),3)
+#   }
+#   
+# }
+# 
+# RI3 = as.data.frame(RI3)
+# write.table(x=RI3,file="comp_kmeans")
+
+# for(l in 2:15){
+#   ARI1bis=matrix(0,100,10)
+#   RI1bis = matrix(0,100,10)
+#   for(k in 1:10){
+#     
+#     # fit1 = cmdscale(jaccard_abundance, eig=TRUE, k=k)
+#     # 
+#     # fit2 = cmdscale(ab_jaccard_abundance,eig=TRUE, k=k)
+#     # 
+#     # fit3 = cmdscale(braycurtis_abundance,eig=TRUE, k=k)
+#     # 
+#     # fit4 = cmdscale(ab_ochiai_abundance,eig=TRUE, k=k)
+#     # 
+#     # fit5 = cmdscale(ab_sorensen_abundance,eig=TRUE, k=k)
+#     # 
+#     # fit6 = cmdscale(simka_jaccard_abundance,eig=TRUE, k=k)
+#     
+#     fit7 = cmdscale(chord_prevalence,eig=TRUE, k=k)
+#     
+#     fit8 = cmdscale(jaccard_prevalence,eig=TRUE, k=k)
+#     
+#     fit9 = cmdscale(kulczynski_prevalence,eig=TRUE, k=k)
+#     
+#     fit10 = cmdscale(ochiai_prevalence,eig=TRUE, k=k)
+#     
+#     fit11 = cmdscale(whittaker_prevalence,eig=TRUE, k=k)
+#     
+#     fit12 = cmdscale(simka_jaccard_prevalence,eig=TRUE, k=k)
+#     
+#     
+#     
+#     for(nb_run in 1:100)
+#     {
+#       # res1 = kmeans(fit1$points,l,nstart = 1000)$cluster
+#       # 
+#       # res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
+#       # 
+#       # res3 = kmeans(fit3$points,l,nstart = 1000)$cluster
+#       # 
+#       # res4 = kmeans(fit4$points,l,nstart = 1000)$cluster
+#       # 
+#       # res5 = kmeans(fit5$points,l,nstart = 1000)$cluster
+#       # 
+#       # res6 = kmeans(fit6$points,l,nstart = 1000)$cluster
+#       
+#       res7 = kmeans(fit7$points,l,nstart = 1000)$cluster
+#       
+#       res8 = kmeans(fit8$points,l,nstart = 1000)$cluster
+#       
+#       res9 = kmeans(fit9$points,l,nstart = 1000)$cluster
+#       
+#       res10 = kmeans(fit10$points,l,nstart = 1000)$cluster
+#       
+#       res11 = kmeans(fit11$points,l,nstart = 1000)$cluster
+#       
+#       res12 = kmeans(fit12$points,l,nstart = 1000)$cluster
+#       
+#       
+#       
+#       for(j in 7:11){
+#         for(m in (j+1):12){
+#           ARI1bis[nb_run,k] = ARI1bis[nb_run,k] + adjustedRand(get(paste("res",j,sep="")),get(paste("res",m,sep="")),randMethod="Rand")
+#           RI1bis[nb_run,k] = RI1bis[nb_run,k] + rand.index(get(paste("res",j,sep="")),get(paste("res",m,sep="")))
+#         }
+#       }
+#       
+#       
+#       ARI1bis[nb_run,k] = ARI1bis[nb_run,k]/15
+#       RI1bis[nb_run,k] = RI1bis[nb_run,k]/15
+#     }
+#     
+#     
+#   }
+#   restot1bis[l-1,1] = max(ARI1bis)
+#   restot1bis[l-1,2] = max(RI1bis)
+# }
 
 
 

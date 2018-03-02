@@ -53,7 +53,7 @@ import_data(size_fraction, samples = NULL)
 # res2 = kmeans(fit2$points,l,nstart = 1000)$cluster
 # rand.index(get(paste("res",1,sep="")),get(paste("res",2,sep="")))
 
-l = 5
+l = 3
 
 # fitJ1 = cmdscale(jaccard_abundance, eig=TRUE, k=2)
 # fitJ2 = cmdscale(jaccard_abundance, eig=TRUE, k=3)
@@ -275,63 +275,63 @@ fitB3 = make.kNNG(braycurtis_abundance, k = 40, symm = TRUE, weight = FALSE)
 
 RI = matrix(0,6,6)
 
-for(iter in 1:100){
-  resJ1 = spectral.clustering(fitJ1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  resJ2 = spectral.clustering(fitJ2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  resJ3 = spectral.clustering(fitJ3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+  resJ1 = spectral.clustering.new(fitJ1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resJ2 = spectral.clustering.new(fitJ2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resJ3 = spectral.clustering.new(fitJ3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
   
-  resS1 = spectral.clustering(fitS1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  resS2 = spectral.clustering(fitS2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  resS3 = spectral.clustering(fitS3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resS1 = spectral.clustering.new(fitS1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resS2 = spectral.clustering.new(fitS2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resS3 = spectral.clustering.new(fitS3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
   
-  resB1 = spectral.clustering(fitB1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  resB2 = spectral.clustering(fitB2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  resB3 = spectral.clustering(fitB3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resB1 = spectral.clustering.new(fitB1, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resB2 = spectral.clustering.new(fitB2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  resB3 = spectral.clustering.new(fitB3, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
   
-  RI[1,] = RI[1,] + c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",1,sep=""))), 
+  RI[1,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",1,sep=""))), 
                       rand.index(get(paste("resS",1,sep="")),get(paste("resS",1,sep=""))), 
                       rand.index(get(paste("resB",1,sep="")),get(paste("resB",1,sep=""))),
                       rand.index(get(paste("resJ",1,sep="")),get(paste("resS",1,sep=""))),
                       rand.index(get(paste("resJ",1,sep="")),get(paste("resB",1,sep=""))),
                       rand.index(get(paste("resS",1,sep="")),get(paste("resB",1,sep=""))))
   
-  RI[2,] = RI[2,] + c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",2,sep=""))), 
+  RI[2,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",2,sep=""))), 
                       rand.index(get(paste("resS",1,sep="")),get(paste("resS",2,sep=""))), 
                       rand.index(get(paste("resB",1,sep="")),get(paste("resB",2,sep=""))),
                       rand.index(get(paste("resJ",1,sep="")),get(paste("resS",2,sep=""))),
                       rand.index(get(paste("resJ",1,sep="")),get(paste("resB",2,sep=""))),
                       rand.index(get(paste("resS",1,sep="")),get(paste("resB",2,sep=""))))
   
-  RI[3,] = RI[3,] + c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",3,sep=""))), 
+  RI[3,] = c(rand.index(get(paste("resJ",1,sep="")),get(paste("resJ",3,sep=""))), 
                       rand.index(get(paste("resS",1,sep="")),get(paste("resS",3,sep=""))), 
                       rand.index(get(paste("resB",1,sep="")),get(paste("resB",3,sep=""))),
                       rand.index(get(paste("resJ",1,sep="")),get(paste("resS",3,sep=""))),
                       rand.index(get(paste("resJ",1,sep="")),get(paste("resB",3,sep=""))),
                       rand.index(get(paste("resS",1,sep="")),get(paste("resB",3,sep=""))))
   
-  RI[4,] = RI[4,] + c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",2,sep=""))), 
+  RI[4,] = c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",2,sep=""))), 
                       rand.index(get(paste("resS",2,sep="")),get(paste("resS",2,sep=""))), 
                       rand.index(get(paste("resB",2,sep="")),get(paste("resB",2,sep=""))),
                       rand.index(get(paste("resJ",2,sep="")),get(paste("resS",2,sep=""))),
                       rand.index(get(paste("resJ",2,sep="")),get(paste("resB",2,sep=""))),
                       rand.index(get(paste("resS",2,sep="")),get(paste("resB",2,sep=""))))
   
-  RI[5,] = RI[5,] + c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",3,sep=""))), 
+  RI[5,] = c(rand.index(get(paste("resJ",2,sep="")),get(paste("resJ",3,sep=""))), 
                       rand.index(get(paste("resS",2,sep="")),get(paste("resS",3,sep=""))), 
                       rand.index(get(paste("resB",2,sep="")),get(paste("resB",3,sep=""))),
                       rand.index(get(paste("resJ",2,sep="")),get(paste("resS",3,sep=""))),
                       rand.index(get(paste("resJ",2,sep="")),get(paste("resB",3,sep=""))),
                       rand.index(get(paste("resS",2,sep="")),get(paste("resB",3,sep=""))))
   
-  RI[6,] = RI[6,] + c(rand.index(get(paste("resJ",3,sep="")),get(paste("resJ",3,sep=""))), 
+  RI[6,] = c(rand.index(get(paste("resJ",3,sep="")),get(paste("resJ",3,sep=""))), 
                       rand.index(get(paste("resS",3,sep="")),get(paste("resS",3,sep=""))), 
                       rand.index(get(paste("resB",3,sep="")),get(paste("resB",3,sep=""))),
                       rand.index(get(paste("resJ",3,sep="")),get(paste("resS",3,sep=""))),
                       rand.index(get(paste("resJ",3,sep="")),get(paste("resB",3,sep=""))),
                       rand.index(get(paste("resS",3,sep="")),get(paste("resB",3,sep=""))))
-}
 
-RI = RI/100
+
+
 
 ###### Prevalence matrices
 

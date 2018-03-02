@@ -1228,7 +1228,7 @@ if(size_fraction=="0.8-5" | size_fraction=="5-20" | size_fraction=="180-2000"){
 rm(list=objects())
 
 Y = matrix(c(1,2,4,7,8,9,3,4,2,5,6,4,1,5,8,9,5,7,1,2),4,5)
-Y = scale(Y)
+Y = scale(Y,scale=F)
 
 X = matrix(c(4,5,3,1,7,8,4,9,1,2,5,6),4,3)
 H = X%*%solve(t(X)%*%X)%*%t(X)
@@ -1800,7 +1800,7 @@ size_fraction4 = "5-20"
 size_fraction5 = "20-180"
 size_fraction6 = "180-2000"
 
-import_data(size_fraction6, samples = rownames(design))
+import_data(size_fraction3, samples = rownames(design))
 
 ############################################################ Subset design and (longitude,latitude)
 
@@ -1846,37 +1846,340 @@ for(i in 1:n){
 
 l = 2
 
+cluster_ref = c()
+  
+for(i in 1:n){
+  if(str_detect(metagenomic_sample,"DCM")[i]==TRUE){
+    cluster_ref[i] = 1
+  }else
+  {
+    cluster_ref[i] = 2
+  }
+}
+
+library(fossil)
+
 # result_cmdscale = matrix(NA,48,2)
 # 
 # for(k1 in 3:50){
 #   fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=k1)
 #   res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
-#   result_cmdscale[k1-2,1] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res2==1]) - sum(str_detect(metagenomic_sample,"DCM")[res2==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+#   result_cmdscale[k1-2,1] = rand.index(res2,cluster_ref) #= round(abs(sum(str_detect(metagenomic_sample,"DCM")[res2==1]) - sum(str_detect(metagenomic_sample,"DCM")[res2==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
 # 
 #   fit2bis = cmdscale(D, eig=TRUE, k=k1)
 #   res2bis = kmeans(fit2bis$points,l, nstart = 1000)$cluster
-#   result_cmdscale[k1-2,2] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res2bis==1]) - sum(str_detect(metagenomic_sample,"DCM")[res2bis==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+#   result_cmdscale[k1-2,2] = rand.index(res2bis,cluster_ref)# = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res2bis==1]) - sum(str_detect(metagenomic_sample,"DCM")[res2bis==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
 # 
-#   cat(sprintf("Itération %s \n",k1-2))
+#   #cat(sprintf("Itération %s \n",k1-2))
 # }
-# result_cmdscale
-# mean(result_cmdscale[,1])
-# mean(result_cmdscale[,2])
+# round(result_cmdscale*100)
+# # mean(result_cmdscale[,1])
+# # mean(result_cmdscale[,2])
 
 result_kNNG = matrix(NA,58,2)
 
 for(k2 in 3:60){
   kNN2 = make.kNNG(D_without_MDS1, k = k2, symm = TRUE, weight = FALSE)
-  res5 = spectral.clustering(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  result_kNNG[k2-2,1] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res5==1]) - sum(str_detect(metagenomic_sample,"DCM")[res5==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+  res5 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  result_kNNG[k2-2,1] = rand.index(res5,cluster_ref)#= round(abs(sum(str_detect(metagenomic_sample,"DCM")[res5==1]) - sum(str_detect(metagenomic_sample,"DCM")[res5==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
 
   kNN2bis = make.kNNG(D, k = k2, symm = TRUE, weight = FALSE)
-  res5bis = spectral.clustering(kNN2bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
-  result_kNNG[k2-2,2] = round(abs(sum(str_detect(metagenomic_sample,"DCM")[res5bis==1]) - sum(str_detect(metagenomic_sample,"DCM")[res5bis==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
+  res5bis = spectral.clustering.new(kNN2bis, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+  result_kNNG[k2-2,2] = rand.index(res5bis,cluster_ref)#= round(abs(sum(str_detect(metagenomic_sample,"DCM")[res5bis==1]) - sum(str_detect(metagenomic_sample,"DCM")[res5bis==2]))/sum(str_detect(metagenomic_sample,"DCM"))*100)
 
   cat(sprintf("Itération %s \n",k2-2))
 }
-result_kNNG
-mean(result_kNNG[,1])
-mean(result_kNNG[,2])
+round(result_kNNG*100)
+# mean(result_kNNG[,1])
+# mean(result_kNNG[,2])
 
+
+
+
+
+############################################### Test de stabilite
+
+rm(list=objects())
+
+library(vegan)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(kernlab)
+library(fossil)
+
+############################################################ Source custom scripts
+
+source('~/metaord/utils.R')
+
+############################################################ Design
+
+data.wd <- "/home/rnarci/Bureau/CDDrnarci/Donnees/"
+design = read.table(file=file.path(data.wd, "param_bioadvection.csv"),sep="",header=TRUE)
+rownames(design) <- design$Sample
+
+############################################################ Import longitude and latitude of the stations
+
+gps = read.table(file=file.path(data.wd,"GPScoordinates2.csv"),header=TRUE,sep="")
+rownames(gps) <- gps$Station
+
+############################################################ Lagrangian distances
+
+lagrangien = read.table(file=file.path(data.wd,"tarrive_min_surface_1000.csv"),header=TRUE, sep="")
+colnames(lagrangien) <- rownames(lagrangien)
+
+############################################################ Import data
+
+size_fraction1 = "0-0.2"
+size_fraction2 = "0.22-3"
+size_fraction3 = "0.8-5"
+size_fraction4 = "5-20"
+size_fraction5 = "20-180"
+size_fraction6 = "180-2000"
+
+import_data(size_fraction3, samples = rownames(design))
+
+############################################################ Subset design and (longitude,latitude)
+
+design <- design[metagenomic_sample, ]
+design <- design[,-c(1,6,7)]
+# design <- design[,-c(1,5,6,7,13)]
+
+gps <- gps[metagenomic_sample,]
+gps <- gps[,-1]
+
+lagrangien = lagrangien[metagenomic_sample,metagenomic_sample]
+
+library(mice)
+mice = complete(mice(design,method="norm.predict",m=1))
+design$Phosphates = mice$Phosphates
+design$NO2NO3 = mice$NO2NO3
+
+design[,c(12,13)] = c(gps$Mean_latitude,gps$Mean_longitude)
+colnames(design)[c(12,13)] = c("Latitude","Longitude")
+
+library(loe)
+library(fcd)
+library(clues)
+
+D = jaccard_abundance
+n = dim(D)[1]
+
+l = 10
+
+kNN = make.kNNG(D, k = 37, symm = TRUE, weight = FALSE)
+
+res1 = specc(x = kNN, centers = l, iterations = 1000)
+res2 = spectral.clustering(kNN, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+rand.index(res1,res2)
+
+res1 = spectral.clustering(kNN, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res2 = spectral.clustering(kNN, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+rand.index(res1,res2)
+
+res1 = specc(x = kNN, centers = l, iterations = 200)
+res2 = specc(x = kNN, centers = l, iterations = 200)
+rand.index(res1,res2)
+
+fit = cmdscale(D,eig=T,k=n-1)
+res1 = kmeans(fit$points, centers = l, nstart = 1000)$cluster
+res2 = kmeans(fit$points, centers = l, nstart = 1000)$cluster
+rand.index(res1,res2)
+
+res1 = spectral.clustering.new(kNN, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+res2 = spectral.clustering.new(kNN, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+rand.index(res1,res2)
+
+
+
+#############################" Tests autres matrices de distances et fractions de taille (05/03/2018)
+
+rm(list=objects())
+
+library(vegan)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+
+
+############################################################ Source custom scripts
+
+source('~/metaord/utils.R')
+
+############################################################ Design
+
+data.wd <- "/home/rnarci/Bureau/CDDrnarci/Donnees/"
+design = read.table(file=file.path(data.wd, "param_bioadvection.csv"),sep="",header=TRUE)
+rownames(design) <- design$Sample
+
+############################################################ Import longitude and latitude of the stations
+
+gps = read.table(file=file.path(data.wd,"GPScoordinates2.csv"),header=TRUE,sep="")
+rownames(gps) <- gps$Station
+
+############################################################ Lagrangian distances
+
+lagrangien = read.table(file=file.path(data.wd,"tarrive_min_surface_1000.csv"),header=TRUE, sep="")
+colnames(lagrangien) <- rownames(lagrangien)
+
+############################################################ Import data
+
+size_fraction1 = "0-0.2"
+size_fraction2 = "0.22-3"
+size_fraction3 = "0.8-5"
+size_fraction4 = "5-20"
+size_fraction5 = "20-180"
+size_fraction6 = "180-2000"
+
+import_data(size_fraction3, samples = rownames(design))
+
+############################################################ Subset design and (longitude,latitude)
+
+design <- design[metagenomic_sample, ]
+design <- design[,-c(1,6,7)]
+# design <- design[,-c(1,5,6,7,13)]
+
+gps <- gps[metagenomic_sample,]
+gps <- gps[,-1]
+
+lagrangien = lagrangien[metagenomic_sample,metagenomic_sample]
+
+library(mice)
+mice = complete(mice(design,method="norm.predict",m=1))
+design$Phosphates = mice$Phosphates
+design$NO2NO3 = mice$NO2NO3
+
+design[,c(12,13)] = c(gps$Mean_latitude,gps$Mean_longitude)
+colnames(design)[c(12,13)] = c("Latitude","Longitude")
+
+D = jaccard_abundance
+n = dim(D)[1]
+
+
+
+
+parms1 = design$Depth
+X1 = matrix(parms1,nrow=n,ncol=1)
+
+
+H1 = X1%*%solve(t(X1)%*%X1)%*%t(X1)
+
+D_without_MDS1 = matrix(NA,n,n)
+
+
+J = diag(rep(1,n)) - matrix(1,n,n)/n
+G = -0.5*J%*%D^2%*%J
+
+for(i in 1:n){
+  for(j in 1:n){
+    D_without_MDS1[i,j] = sqrt(H1[i,]%*%G%*%H1[,i] + H1[j,]%*%G%*%H1[,j] - 2*H1[i,]%*%G%*%H1[,j])
+  }
+}
+
+
+fit2 = cmdscale(D_without_MDS1, eig=TRUE, k=n-1)
+
+
+
+
+library(loe)
+library(fcd)
+library(clues)
+
+
+kNN2 = make.kNNG(D_without_MDS1, k = 37, symm = TRUE, weight = FALSE)
+
+
+####### Clustering de l clusters
+
+l = 2
+
+
+res2 = kmeans(fit2$points,l, nstart = 1000)$cluster
+
+
+
+res5 = spectral.clustering.new(kNN2, normalised = TRUE, score = FALSE, K = l, adj = FALSE)
+
+
+library(rworldmap)
+newmap <- getMap(resolution = "li")
+
+color = c()
+labels = c()
+cl = res2
+
+for(i in 1:length(cl)){
+  if(cl[i]==1){
+    color[i] = "blue"
+  }
+  if(cl[i]==2){
+    color[i] = "red"
+  }
+  if(str_length(rownames(gps)[i]) == 5){
+    labels[i] = substr(rownames(gps)[i],1,1)
+  }
+  if(str_length(rownames(gps)[i]) == 6){
+    labels[i] = substr(rownames(gps)[i],1,2)
+  }
+  if(str_length(rownames(gps)[i]) == 7){
+    labels[i] = substr(rownames(gps)[i],1,3)
+  }
+}
+
+DCM_indices = which(str_detect(rownames(gps),"DCM")==TRUE)
+SUR_indices = which(str_detect(rownames(gps),"SUR")==TRUE)
+
+SUR_only_indices = c()
+a = 1
+for(i in 1:length(cl)){
+  if(length(which(labels[SUR_indices][i]!=labels[DCM_indices]))==length(labels[DCM_indices])){
+    SUR_only_indices[a] = SUR_indices[i]  
+    a = a + 1
+  }
+}
+
+plot(newmap, xlim = c(-180, 90), ylim = c(-75, 75), asp = 1)
+points(gps$Mean_longitude[DCM_indices], gps$Mean_latitude[DCM_indices], col = color[DCM_indices], cex = 1, pch = 17)
+points(gps$Mean_longitude[SUR_indices], gps$Mean_latitude[SUR_indices] + 2, col = color[SUR_indices], cex = 1, pch = 16)
+
+
+color = c()
+labels = c()
+cl = res5
+
+for(i in 1:length(cl)){
+  if(cl[i]==1){
+    color[i] = "blue"
+  }
+  if(cl[i]==2){
+    color[i] = "red"
+  }
+  if(str_length(rownames(gps)[i]) == 5){
+    labels[i] = substr(rownames(gps)[i],1,1)
+  }
+  if(str_length(rownames(gps)[i]) == 6){
+    labels[i] = substr(rownames(gps)[i],1,2)
+  }
+  if(str_length(rownames(gps)[i]) == 7){
+    labels[i] = substr(rownames(gps)[i],1,3)
+  }
+}
+
+DCM_indices = which(str_detect(rownames(gps),"DCM")==TRUE)
+SUR_indices = which(str_detect(rownames(gps),"SUR")==TRUE)
+
+SUR_only_indices = c()
+a = 1
+for(i in 1:length(cl)){
+  if(length(which(labels[SUR_indices][i]!=labels[DCM_indices]))==length(labels[DCM_indices])){
+    SUR_only_indices[a] = SUR_indices[i]  
+    a = a + 1
+  }
+}
+
+plot(newmap, xlim = c(-180, 90), ylim = c(-75, 75), asp = 1)
+points(gps$Mean_longitude[DCM_indices], gps$Mean_latitude[DCM_indices], col = color[DCM_indices], cex = 1, pch = 17)
+points(gps$Mean_longitude[SUR_indices], gps$Mean_latitude[SUR_indices] + 2, col = color[SUR_indices], cex = 1, pch = 16)
