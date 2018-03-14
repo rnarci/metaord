@@ -36,7 +36,7 @@ size_fraction4 = "5-20"
 size_fraction5 = "20-180"
 size_fraction6 = "180-2000"
 
-import_data(size_fraction1, samples = rownames(design))
+import_data(size_fraction3, samples = rownames(design))
 
 ############################################################ Subset design and (longitude,latitude)
 
@@ -618,7 +618,7 @@ newmap <- getMap(resolution = "li")
 
 color = c()
 labels = c()
-cl = res5
+cl = res2
 
 for(i in 1:length(cl)){
   if(cl[i]==1){

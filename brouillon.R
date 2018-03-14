@@ -2183,3 +2183,9 @@ for(i in 1:length(cl)){
 plot(newmap, xlim = c(-180, 90), ylim = c(-75, 75), asp = 1)
 points(gps$Mean_longitude[DCM_indices], gps$Mean_latitude[DCM_indices], col = color[DCM_indices], cex = 1, pch = 17)
 points(gps$Mean_longitude[SUR_indices], gps$Mean_latitude[SUR_indices] + 2, col = color[SUR_indices], cex = 1, pch = 16)
+
+
+
+
+
+

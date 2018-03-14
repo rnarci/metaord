@@ -618,7 +618,7 @@ spectral.clustering.new <- function(A, normalised = TRUE, score = FALSE, K = 2, 
   U = scale(U, center = F)
   temp = unique(U, margin = 2)
   if(dim(temp)[1] < K){stop('FAIL!')}
-  k.means = kmeans(U, centers = K, nstart = 1000)
+  k.means = kmeans(U, centers = K, nstart = 1000, iter.max = 20)
   labels[noniso.seq] = k.means$cluster
   
   return(labels)
