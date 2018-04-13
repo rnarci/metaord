@@ -11,7 +11,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(gdata)
-
+library(combinat)
 
 source('~/metaord/utils.R')
 
@@ -66,11 +66,50 @@ setwd(oldwd)
 
 comparison = compare_clusterings()
 
-size_fraction = "0.8-5"
+size_fraction = "0-0.2"
 frac = which(comparison$Fraction == size_fraction)
+
 p = ggplot(comparison[frac,], aes(x = Param, y = RI, color = Type)) +
   geom_point(alpha = 1, size = 1) +
   scale_y_continuous(limits = c(0,1)) +
-  ggtitle(size_fraction) +
+  # ggtitle(size_fraction) +
   facet_wrap(~Distance)
 plot(p)
+
+p = ggplot(comparison, aes(x = Distance, y = RI, color = Type)) +
+  geom_boxplot() +
+  # scale_y_continuous(limits = c(0,1)) +
+  # ggtitle(size_fraction) +
+  facet_wrap(~Fraction)
+plot(p)
+
+######################################################## Identify the samples which are clustered in different group :
+######################################################## K-means clustering vs Genoscope clustering
+
+comparison = compare_clusterings()
+
+size_fraction = "0.8-5"
+id_samples = identify_samples_ex(size_fraction)
+# id_samples = identify_samples(size_fraction)
+# Kmeans_clustering = id_samples$Kmeans_clustering
+# Kmeans_initial = id_samples$Kmeans_initial
+# Genoscope_clustering = id_samples$Genoscope_clustering
+all_permutations = id_samples$all_permutations
+score = id_samples$score
+max(score)
+which(score==max(score))
+all_permutations[472,]
+all_permutations[489,]
+
+score
+rand.index(Kmeans_clustering,Kmeans_initial)
+rand.index(Kmeans_clustering,Genoscope_clustering)
+Kmeans_clustering
+Genoscope_clustering
+
+which(Kmeans_clustering!=Genoscope_clustering)
+
+############################################################# Eigenvalues study
+
+size_fraction = "180-2000"
+eigenvalues_study(size_fraction)

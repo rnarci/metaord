@@ -3004,3 +3004,585 @@ for(size_fraction in c("0-0.2","0.22-3","0.8-5","5-20","20-180","180-2000")){
   ggsave(p, file = "RI_summary_seuil3.png", width = 15, height = 10, dpi = 100) 
 }
 
+
+
+
+
+
+################################ Recherche artisanale des differences entre K-means et hclust
+
+rm(list=objects())
+
+library(fcd)
+library(loe)
+library(clues)
+library(cccd)
+library(fossil)
+library(igraph)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gdata)
+
+
+source('~/metaord/utils.R')
+
+############################################# Import Genoscope data
+
+oldwd <- getwd() 
+
+setwd(dir="~/Bureau/CDDrnarci/Donnees")
+data1 = read.xls(xls="Genocenoses_env_parameters_all_tara.xlsx", method = "csv")
+# data2 = read.xls(xls="Genocenoses_env_parameters_all_woa.xlsx", method = "csv") -> same clustering
+data.0_0.2 = data1[which((as.character(data1$Fraction) == "0-0.2") == TRUE),c(1,3)] 
+data.0.22_3 = data1[which((as.character(data1$Fraction) == "0.22-3") == TRUE),c(1,3)] 
+data.0.8_5 = data1[which((as.character(data1$Fraction) == "0.8-5") == TRUE),c(1,3)] 
+data.5_20 = data1[which((as.character(data1$Fraction) == "May-20") == TRUE),c(1,3)] 
+data.20_180 = data1[which((as.character(data1$Fraction) == "20-180") == TRUE),c(1,3)] 
+data.180_2000 = data1[which((as.character(data1$Fraction) == "180-2000") == TRUE),c(1,3)] 
+
+rownames(data.0_0.2) = data.0_0.2$Station
+rownames(data.0.22_3) = data.0.22_3$Station
+rownames(data.0.8_5) = data.0.8_5$Station
+rownames(data.5_20) = data.5_20$Station
+rownames(data.20_180) = data.20_180$Station
+rownames(data.180_2000) = data.180_2000$Station
+
+setwd(oldwd)
+
+comparison = compare_clusterings()
+
+size_fraction = "0-0.2"
+dir = c("~/Bureau/CDDrnarci/stability_study/cluster_metaord_subsample_stations/0-0.2/mat_kmeans")
+setwd(dir=dir)
+l = max(data.0_0.2$Genocenose)
+index = which(comparison$Distance=="SBP" & comparison$Fraction==size_fraction & comparison$Type=="Kmeans")
+new_RI = comparison[index,]$RI
+k = which.max(new_RI)
+RI_max = new_RI[k]
+mat = read.table("Mat11_kmeans")
+
+h_clust = data.0_0.2$Genocenose
+n = dim(data.0_0.2)[1]
+K_means = rep(NA,n)
+
+for(i in 3:(n+2)){
+  K_means[i-2] = mat[which(mat[,1]==k & mat[,2]==l),i]
+}
+mat[which(mat[,1]==k & mat[,2]==l),3:(n+2)]-K_means
+rand.index(K_means,h_clust)==RI_max
+
+K_means
+h_clust
+K_means_ex = K_means
+h_clust_ex = h_clust
+K_means[which(K_means_ex==6)]=7
+K_means[which(K_means_ex==7)]=3
+K_means[which(K_means_ex==3)]=6
+K_means
+h_clust
+h_clust[which(h_clust_ex==4)]=2
+h_clust[which(h_clust_ex==2)]=8
+h_clust[which(h_clust_ex==8)]=4
+h_clust_ex_ex = h_clust_ex
+h_clust_ex = h_clust
+h_clust[which(h_clust_ex==4)]=5
+h_clust[which(h_clust_ex==5)]=4
+K_means
+h_clust
+rand.index(h_clust_ex_ex,K_means_ex)
+rand.index(h_clust,K_means)
+rand.index(K_means,K_means_ex)
+rand.index(h_clust,h_clust_ex_ex)
+
+rownames(data.0_0.2)[h_clust==2]
+rownames(data.0_0.2)[K_means==1]
+
+rownames(data.0_0.2)[K_means==8]
+rownames(data.0_0.2)[h_clust==1]
+
+rownames(data.0_0.2)[K_means==4]
+rownames(data.0_0.2)[h_clust==6]
+
+#############################################################################################
+
+size_fraction = "0.22-3"
+dir = c("~/Bureau/CDDrnarci/stability_study/cluster_metaord_subsample_stations/0.22-3/mat_kmeans")
+setwd(dir=dir)
+l = max(data.0.22_3$Genocenose)
+index = which(comparison$Distance=="SBP" & comparison$Fraction==size_fraction & comparison$Type=="Kmeans")
+new_RI = comparison[index,]$RI
+k = which.max(new_RI)
+RI_max = new_RI[k]
+which(matrices.list=="sorensen_braycurtis_prevalence")
+mat = read.table("Mat11_kmeans")
+
+h_clust = data.0.22_3$Genocenose
+n = dim(data.0.22_3)[1]
+K_means = rep(NA,n)
+
+for(i in 3:(n+2)){
+  K_means[i-2] = mat[which(mat[,1]==k & mat[,2]==l),i]
+}
+mat[which(mat[,1]==k & mat[,2]==l),3:(n+2)]-K_means
+rand.index(K_means,h_clust)==RI_max
+
+K_means
+h_clust
+K_means_ex = K_means
+h_clust_ex = h_clust
+K_means[which(K_means_ex==1)]=5
+K_means[which(K_means_ex==5)]=1
+K_means
+h_clust
+h_clust[which(h_clust_ex==7)]=6
+h_clust[which(h_clust_ex==6)]=2
+h_clust[which(h_clust_ex==2)]=7
+h_clust[which(h_clust_ex==3)]=8
+h_clust[which(h_clust_ex==8)]=3
+K_means
+h_clust
+rand.index(h_clust_ex,K_means_ex)
+rand.index(h_clust,K_means)
+rand.index(K_means,K_means_ex)
+rand.index(h_clust,h_clust_ex)
+
+rownames(data.0.22_3)[h_clust==6]
+rownames(data.0.22_3)[K_means==6]
+
+rownames(data.0.22_3)[K_means==5]
+rownames(data.0.22_3)[h_clust==5]
+
+rownames(data.0.22_3)[K_means==8]
+rownames(data.0.22_3)[h_clust==8]
+
+#############################################################################################
+
+size_fraction = "0.8-5"
+dir = c("~/Bureau/CDDrnarci/stability_study/cluster_metaord_subsample_stations/0.8-5/mat_kmeans")
+setwd(dir=dir)
+l = max(data.0.8_5$Genocenose)
+index = which(comparison$Distance=="SBP" & comparison$Fraction==size_fraction & comparison$Type=="Kmeans")
+new_RI = comparison[index,]$RI
+k = which.max(new_RI)
+RI_max = new_RI[k]
+which(matrices.list=="sorensen_braycurtis_prevalence")
+mat = read.table("Mat13_kmeans")
+
+h_clust = data.0.8_5$Genocenose
+n = dim(data.0.8_5)[1]
+K_means = rep(NA,n)
+
+for(i in 3:(n+2)){
+  K_means[i-2] = mat[which(mat[,1]==k & mat[,2]==l),i]
+}
+mat[which(mat[,1]==k & mat[,2]==l),3:(n+2)]-K_means
+rand.index(K_means,h_clust)==RI_max
+
+K_means
+h_clust
+K_means_ex = K_means
+h_clust_ex = h_clust
+K_means[which(K_means_ex==11)]=9
+K_means[which(K_means_ex==9)]=11
+K_means[which(K_means_ex==2)]=8
+K_means[which(K_means_ex==8)]=2
+K_means[which(K_means_ex==1)]=10
+K_means[which(K_means_ex==10)]=1
+K_means
+h_clust
+h_clust[which(h_clust_ex==11)]=4
+h_clust[which(h_clust_ex==4)]=11
+h_clust[which(h_clust_ex==7)]=2
+h_clust[which(h_clust_ex==2)]=7
+K_means
+h_clust
+rand.index(h_clust_ex,K_means_ex)
+rand.index(h_clust,K_means)
+rand.index(K_means,K_means_ex)
+rand.index(h_clust,h_clust_ex)
+
+rownames(data.0.8_5)[h_clust==9]
+rownames(data.0.8_5)[K_means==9]
+
+rownames(data.0.8_5)[K_means==8]
+rownames(data.0.8_5)[h_clust==8]
+
+rownames(data.0.8_5)[K_means==3]
+rownames(data.0.8_5)[h_clust==3]
+
+rownames(data.0.8_5)[K_means==4]
+rownames(data.0.8_5)[h_clust==4]
+
+rownames(data.0.8_5)[K_means==7]
+rownames(data.0.8_5)[h_clust==7]
+
+#############################################################################################
+
+size_fraction = "5-20"
+dir = c("~/Bureau/CDDrnarci/stability_study/cluster_metaord_subsample_stations/5-20/mat_kmeans")
+setwd(dir=dir)
+l = max(data.5_20$Genocenose)
+index = which(comparison$Distance=="SBP" & comparison$Fraction==size_fraction & comparison$Type=="Kmeans")
+new_RI = comparison[index,]$RI
+k = which.max(new_RI)
+RI_max = new_RI[k]
+which(matrices.list=="sorensen_braycurtis_prevalence")
+mat = read.table("Mat13_kmeans")
+
+h_clust = data.5_20$Genocenose
+n = dim(data.5_20)[1]
+K_means = rep(NA,n)
+
+for(i in 3:(n+2)){
+  K_means[i-2] = mat[which(mat[,1]==k & mat[,2]==l),i]
+}
+mat[which(mat[,1]==k & mat[,2]==l),3:(n+2)]-K_means
+rand.index(K_means,h_clust)==RI_max
+
+K_means
+h_clust
+K_means_ex = K_means
+h_clust_ex = h_clust
+
+rand.index(h_clust_ex,K_means_ex)
+rand.index(h_clust,K_means)
+rand.index(K_means,K_means_ex)
+rand.index(h_clust,h_clust_ex)
+
+rownames(data.5_20)[h_clust==4]
+rownames(data.5_20)[K_means==6]
+rownames(data.5_20)[K_means==1]
+
+rownames(data.5_20)[K_means==4]
+rownames(data.5_20)[K_means==3]
+rownames(data.5_20)[h_clust==3]
+
+rownames(data.5_20)[K_means==5]
+rownames(data.5_20)[K_means==6]
+rownames(data.5_20)[h_clust==5]
+rownames(data.5_20)[h_clust==6]
+
+#############################################################################################
+
+size_fraction = "20-180"
+dir = c("~/Bureau/CDDrnarci/stability_study/cluster_metaord_subsample_stations/20-180/mat_kmeans")
+setwd(dir=dir)
+l = max(data.20_180$Genocenose)
+index = which(comparison$Distance=="SBP" & comparison$Fraction==size_fraction & comparison$Type=="Kmeans")
+new_RI = comparison[index,]$RI
+k = which.max(new_RI)
+RI_max = new_RI[k]
+which(matrices.list=="sorensen_braycurtis_prevalence")
+mat = read.table("Mat11_kmeans")
+
+h_clust = data.20_180$Genocenose
+n = dim(data.20_180)[1]
+K_means = rep(NA,n)
+
+for(i in 3:(n+2)){
+  K_means[i-2] = mat[which(mat[,1]==k & mat[,2]==l),i]
+}
+mat[which(mat[,1]==k & mat[,2]==l),3:(n+2)]-K_means
+rand.index(K_means,h_clust)==RI_max
+
+K_means
+h_clust
+K_means_ex = K_means
+h_clust_ex = h_clust
+K_means[which(K_means_ex==3)]=6
+K_means[which(K_means_ex==6)]=3
+K_means
+h_clust
+h_clust[which(h_clust_ex==4)]=3
+h_clust[which(h_clust_ex==3)]=4
+K_means
+h_clust
+rand.index(h_clust_ex,K_means_ex)
+rand.index(h_clust,K_means)
+rand.index(K_means,K_means_ex)
+rand.index(h_clust,h_clust_ex)
+
+rownames(data.20_180)[h_clust==6]
+rownames(data.20_180)[K_means==6]
+
+rownames(data.20_180)[K_means==5]
+rownames(data.20_180)[K_means==2]
+rownames(data.20_180)[h_clust==5]
+
+rownames(data.20_180)[K_means==3]
+rownames(data.20_180)[h_clust==3]
+
+#############################################################################################
+
+size_fraction = "180-2000"
+dir = c("~/Bureau/CDDrnarci/stability_study/cluster_metaord_subsample_stations/180-2000/mat_kmeans")
+setwd(dir=dir)
+l = max(data.180_2000$Genocenose)
+index = which(comparison$Distance=="SBP" & comparison$Fraction==size_fraction & comparison$Type=="Kmeans")
+new_RI = comparison[index,]$RI
+k = which.max(new_RI)
+RI_max = new_RI[k]
+which(matrices.list=="sorensen_braycurtis_prevalence")
+mat = read.table("Mat13_kmeans")
+
+h_clust = data.180_2000$Genocenose
+n = dim(data.180_2000)[1]
+K_means = rep(NA,n)
+
+for(i in 3:(n+2)){
+  K_means[i-2] = mat[which(mat[,1]==k & mat[,2]==l),i]
+}
+mat[which(mat[,1]==k & mat[,2]==l),3:(n+2)]-K_means
+rand.index(K_means,h_clust)==RI_max
+
+K_means
+h_clust
+K_means_ex = K_means
+h_clust_ex = h_clust
+K_means[which(K_means_ex==6)]=8
+K_means[which(K_means_ex==8)]=6
+K_means
+h_clust
+rand.index(h_clust_ex,K_means_ex)
+rand.index(h_clust,K_means)
+rand.index(K_means,K_means_ex)
+rand.index(h_clust,h_clust_ex)
+
+rownames(data.0.8_5)[h_clust==8]
+rownames(data.0.8_5)[K_means==8]
+
+rownames(data.0.8_5)[K_means==4]
+rownames(data.0.8_5)[K_means==3]
+rownames(data.0.8_5)[K_means==2]
+rownames(data.0.8_5)[h_clust==5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################################ Etude des valeurs propres pour le MDS
+
+rm(list=objects())
+
+library(fcd)
+library(loe)
+library(clues)
+library(cccd)
+library(fossil)
+library(igraph)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gdata)
+library(combinat)
+
+source('~/metaord/utils.R')
+
+############################################# Import Genoscope data
+
+oldwd <- getwd() 
+
+setwd(dir="~/Bureau/CDDrnarci/Donnees")
+data1 = read.xls(xls="Genocenoses_env_parameters_all_tara.xlsx", method = "csv")
+# data2 = read.xls(xls="Genocenoses_env_parameters_all_woa.xlsx", method = "csv") -> same clustering
+data.0_0.2 = data1[which((as.character(data1$Fraction) == "0-0.2") == TRUE),c(1,3)] 
+data.0.22_3 = data1[which((as.character(data1$Fraction) == "0.22-3") == TRUE),c(1,3)] 
+data.0.8_5 = data1[which((as.character(data1$Fraction) == "0.8-5") == TRUE),c(1,3)] 
+data.5_20 = data1[which((as.character(data1$Fraction) == "May-20") == TRUE),c(1,3)] 
+data.20_180 = data1[which((as.character(data1$Fraction) == "20-180") == TRUE),c(1,3)] 
+data.180_2000 = data1[which((as.character(data1$Fraction) == "180-2000") == TRUE),c(1,3)] 
+
+rownames(data.0_0.2) = data.0_0.2$Station
+rownames(data.0.22_3) = data.0.22_3$Station
+rownames(data.0.8_5) = data.0.8_5$Station
+rownames(data.5_20) = data.5_20$Station
+rownames(data.20_180) = data.20_180$Station
+rownames(data.180_2000) = data.180_2000$Station
+
+setwd(oldwd)
+
+size_fraction = "0-0.2"
+delete = which(is.na(data.0_0.2$Genocenose))
+data.0_0.2 = data.0_0.2[-delete,]
+import_data(size_fraction, samples = rownames(data.0_0.2))
+data.0_0.2 = data.0_0.2[metagenomic_sample,]
+n = dim(jaccard_abundance)[1]
+l = 8
+
+mat = "ochiai_abundance"
+seuil = 25
+
+test = list()
+points = list()
+clust = list()
+ri = c()
+equal_vp = c()
+
+for(k in 1:round(n/2)){
+  mds = cmdscale(get(mat), k = k, eig = T)
+  test[[k]] = mds$eig
+  points[[k]] = mds$points
+}
+
+for(k in 1:round(n/2)){
+  equal_vp[k] = sum(test[[seuil]]==test[[k]])
+}
+
+for(k in 1:round(n/2)){
+  clust[[k]] = kmeans(x = points[[k]], centers = l, nstart = 1000, iter.max = 20)$cluster
+}
+
+for(k in 1:round(n/2)){
+  ri[k]=rand.index(clust[[seuil]],clust[[k]])
+}
+
+equal_vp
+ri
+
+######################################### Decroissance des valeurs propres
+
+test[[seuil]]
+plot(1:68, test[[seuil]], xlab="Nombre de dimension", ylab="Valeur propre", col = "blue", pch = 19)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rm(list=objects())
+
+library(fcd)
+library(loe)
+library(clues)
+library(cccd)
+library(fossil)
+library(igraph)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gdata)
+library(combinat)
+library(poilog)
+library(vegan)
+
+source('~/metaord/utils.R')
+
+### plot density for given parameters 
+barplot(dpoilog(n=0:20,mu=2,sig=1),names.arg=0:20)
+
+### draw random deviates from a community of 50 species 
+rpoilog(S=50,mu=2,sig=1)
+
+### draw random deviates including zeros 
+rpoilog(S=50,mu=2,sig=1,keep0=TRUE)
+
+### draw random deviates with sampling intensity = 0.5 
+rpoilog(S=50,mu=2,sig=1,nu=0.5)
+
+### how many species are likely to be observed 
+### (given S,mu,sig2 and nu)? 
+hist(replicate(1000,length(rpoilog(S=30,mu=0,sig=3,nu=0.7))))
+
+### how many individuals are likely to be observed
+### (given S,mu,sig2 and nu)? 
+hist(replicate(1000,sum(rpoilog(S=30,mu=0,sig=3,nu=0.7))))
+
+
+
+n = 30
+p = 40
+count_data = matrix(NA,n,p)
+# count_databis = matrix(NA,200,50)
+
+mu1 = runif(p,-1,1)
+mu2 = runif(p,-0.9,0.9)
+sig1 = 0.5
+sig2 = 0.45
+
+# mu3 = runif(50,-1,1)
+# 
+# sigma1 = rep(1,50)
+# sigma2 = rep(1.1,50)
+# sigma3 = rep(1,50)
+# 
+sum(mu1 + sig1^2/2)
+sum(mu2 + sig2^2/2)
+# sum(mu3 + sigma3^2/2)
+# 
+# Z1 = rnorm(50, mean = mu1, sd = sigma1)
+# Z2 = rnorm(50, mean = mu2, sd = sigma2)
+# group1 = t(replicate(100,rpois(50, exp(Z1))))
+# group2 = t(replicate(100,rpois(50, exp(Z2))))
+
+group1 = t(replicate(n/2,rpoilog(S=p,mu=mu1,sig=sig1,keep0=TRUE)))
+group2 = t(replicate(n/2,rpoilog(S=p,mu=mu2,sig=sig2,keep0=TRUE)))
+
+count_data = rbind(group1,group2)
+# rowSums(count_data)
+# sum(rowSums(count_data)[1:(n/2)])
+# sum(rowSums(count_data)[(n/2+1):n])
+
+braycurtis_distance = as.matrix(vegdist(count_data, method = "bray"))
+clust_ref = c(rep(1,n/2),rep(2,n/2))
+
+RI1 = c()
+for(k in 1:(n-1)){
+  fit1 = cmdscale(braycurtis_distance, k = k)
+  clust1 = kmeans(x = fit1, centers = 2, iter.max = 20, nstart = 1000)$cluster
+  RI1[k] = rand.index(clust1, clust_ref)
+}
+RI1
+
+RI2 = c()
+for(k in 1:(n-1)){
+  kNN1 = make.kNNG(braycurtis_distance, k = k, symm = TRUE, weight = FALSE)
+  clust2 = spectral.clustering.new(A = kNN1, K = 2)
+  RI2[k] = rand.index(clust2, clust_ref)  
+}
+RI2
+
+braycurtis_distance = vegdist(count_data, method = "bray")
+# adonis(braycurtis_distance ~ clust_ref)
+
+ord = get.order(as.matrix(braycurtis_distance))
+embedding = SOE(CM = ord, N = nrow(as.matrix(braycurtis_distance)), p = 7, c = 0.1, maxit = 1000, report = 100)
+# summary(lm(embedding$X ~ clust_ref))
+# summary(manova(embedding$X ~ clust_ref + runif(n,-1,1)))
+
+RI3 = c()
+fit3 = embedding$X
+clust3 = kmeans(x = fit3, centers = 2, iter.max = 20, nstart = 1000)$cluster
+RI3 = rand.index(clust3, clust_ref)
+RI3
