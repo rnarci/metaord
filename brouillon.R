@@ -3496,6 +3496,7 @@ library(gdata)
 library(combinat)
 library(poilog)
 library(vegan)
+library(ade4)
 
 source('~/metaord/utils.R')
 
@@ -3521,15 +3522,19 @@ hist(replicate(1000,sum(rpoilog(S=30,mu=0,sig=3,nu=0.7))))
 
 
 
-n = 30
+n = 28
 p = 40
 count_data = matrix(NA,n,p)
 # count_databis = matrix(NA,200,50)
 
 mu1 = runif(p,-1,1)
 mu2 = runif(p,-0.9,0.9)
+mu3 = runif(p,-0.8,0.8)
+mu4 = runif(p,-1.1,1.1)
 sig1 = 0.5
 sig2 = 0.45
+sig3 = 0.40
+sig4 = 0.55
 
 # mu3 = runif(50,-1,1)
 # 
@@ -3539,6 +3544,8 @@ sig2 = 0.45
 # 
 sum(mu1 + sig1^2/2)
 sum(mu2 + sig2^2/2)
+sum(mu3 + sig3^2/2)
+sum(mu4 + sig4^2/2)
 # sum(mu3 + sigma3^2/2)
 # 
 # Z1 = rnorm(50, mean = mu1, sd = sigma1)
@@ -3546,21 +3553,23 @@ sum(mu2 + sig2^2/2)
 # group1 = t(replicate(100,rpois(50, exp(Z1))))
 # group2 = t(replicate(100,rpois(50, exp(Z2))))
 
-group1 = t(replicate(n/2,rpoilog(S=p,mu=mu1,sig=sig1,keep0=TRUE)))
-group2 = t(replicate(n/2,rpoilog(S=p,mu=mu2,sig=sig2,keep0=TRUE)))
+group1 = t(replicate(n/4,rpoilog(S=p,mu=mu1,sig=sig1,keep0=TRUE)))
+group2 = t(replicate(n/4,rpoilog(S=p,mu=mu2,sig=sig2,keep0=TRUE)))
+group3 = t(replicate(n/4,rpoilog(S=p,mu=mu3,sig=sig3,keep0=TRUE)))
+group4 = t(replicate(n/4,rpoilog(S=p,mu=mu4,sig=sig4,keep0=TRUE)))
 
-count_data = rbind(group1,group2)
+count_data = rbind(group1,group2,group3,group4)
 # rowSums(count_data)
 # sum(rowSums(count_data)[1:(n/2)])
 # sum(rowSums(count_data)[(n/2+1):n])
 
 braycurtis_distance = as.matrix(vegdist(count_data, method = "bray"))
-clust_ref = c(rep(1,n/2),rep(2,n/2))
+clust_ref = c(rep(1,n/4),rep(2,n/4),rep(3,n/4),rep(4,n/4))
 
 RI1 = c()
 for(k in 1:(n-1)){
   fit1 = cmdscale(braycurtis_distance, k = k)
-  clust1 = kmeans(x = fit1, centers = 2, iter.max = 20, nstart = 1000)$cluster
+  clust1 = kmeans(x = fit1, centers = 4, iter.max = 20, nstart = 1000)$cluster
   RI1[k] = rand.index(clust1, clust_ref)
 }
 RI1
@@ -3568,7 +3577,8 @@ RI1
 RI2 = c()
 for(k in 1:(n-1)){
   kNN1 = make.kNNG(braycurtis_distance, k = k, symm = TRUE, weight = FALSE)
-  clust2 = spectral.clustering.new(A = kNN1, K = 2)
+  # kNN1 = make.kRNG(L = braycurtis_distance, k = k)
+  clust2 = spectral.clustering.new(A = kNN1, K = 4)
   RI2[k] = rand.index(clust2, clust_ref)  
 }
 RI2
@@ -3583,6 +3593,201 @@ embedding = SOE(CM = ord, N = nrow(as.matrix(braycurtis_distance)), p = 7, c = 0
 
 RI3 = c()
 fit3 = embedding$X
-clust3 = kmeans(x = fit3, centers = 2, iter.max = 20, nstart = 1000)$cluster
+clust3 = kmeans(x = fit3, centers = 4, iter.max = 20, nstart = 1000)$cluster
 RI3 = rand.index(clust3, clust_ref)
 RI3
+
+############################################### Dans R^2 ? 
+
+n = 160
+
+group1_x = runif(n/4,1,2)
+group1_y = runif(n/4,1,2)
+group2_x = runif(n/4,1.5,2.5)
+group2_y = runif(n/4,1.5,2.5)
+group3_x = runif(n/4,0.5,1.5)
+group3_y = runif(n/4,0.5,1.5)
+group4_x = runif(n/4,1.5,2)
+group4_y = runif(n/4,1.5,2)
+
+par(mfrow=c(1,3))
+
+plot(group2_x,group2_y,col="green", xlab = "x", ylab = "y", xlim = c(0.5,2.5), ylim = c(0.5,2.5), main="Données", pch = 16)
+points(group1_x,group1_y,col="red", pch = 16)
+points(group3_x,group3_y,col="black", pch = 16)
+points(group4_x,group4_y,col="blue", pch = 16)
+
+dim1 = c(group1_x,group2_x,group3_x,group4_x)
+dim2 = c(group1_y,group2_y,group3_y,group4_y)
+
+data = matrix(c(dim1,dim2),nrow=n,ncol=2)
+L = as.matrix(dist(data,method="euclidean",diag=TRUE))
+
+clust_ref = c(rep(1,n/4),rep(2,n/4),rep(3,n/4),rep(4,n/4))
+
+RI1 = c()
+for(k in 1:20){
+  fit1 = cmdscale(L, k = k)
+  clust1 = kmeans(x = fit1, centers = 4, iter.max = 20, nstart = 1000)$cluster
+  RI1[k] = rand.index(clust1, clust_ref)
+}
+RI1
+
+k_opt1 = which.max(RI1)
+fit1_opt = cmdscale(L, k = k_opt1)
+clust1_opt = kmeans(x = fit1_opt, centers = 4, iter.max = 20, nstart = 1000)$cluster
+
+plot(dim1[which(clust1_opt==1)],dim2[which(clust1_opt==1)],xlab="x",ylab="y",col="green", xlim = c(0.5,2.5), ylim = c(0.5,2.5), main = "Méthode non-ordinale", pch = 16)
+points(dim1[which(clust1_opt==2)],dim2[which(clust1_opt==2)],col="red", pch = 16)
+points(dim1[which(clust1_opt==3)],dim2[which(clust1_opt==3)],col="black", pch = 16)
+points(dim1[which(clust1_opt==4)],dim2[which(clust1_opt==4)],col="blue", pch = 16)
+
+RI2 = c()
+for(k in 10:50){
+  kNN1 = make.kNNG(L, k = k, symm = TRUE, weight = FALSE)
+  # kNN1 = make.kRNG(L = L, k = k)
+  clust2 = spectral.clustering.new(A = kNN1, K = 4)
+  RI2[k] = rand.index(clust2, clust_ref)  
+}
+RI2
+
+k_opt2 = which.max(RI2)
+kNN2_opt = make.kNNG(L = L, k = k_opt2)
+clust2_opt = spectral.clustering.new(A = kNN2_opt, K = 4)
+
+plot(dim1[which(clust2_opt==1)],dim2[which(clust2_opt==1)],xlab="x",ylab="y",col="green", xlim = c(0.5,2.5), ylim = c(0.5,2.5), main = "Méthode ordinale", pch = 16)
+points(dim1[which(clust2_opt==2)],dim2[which(clust2_opt==2)],col="red", pch = 16)
+points(dim1[which(clust2_opt==3)],dim2[which(clust2_opt==3)],col="black", pch = 16)
+points(dim1[which(clust2_opt==4)],dim2[which(clust2_opt==4)],col="blue", pch = 16)
+
+par(mfrow=c(1,2))
+
+plot(1:20,RI1, ylim = c(0,1), main = "Méthode non-ordinale", xlab = "d", ylab = "RI", pch = 16)
+plot(1:20,RI2, ylim = c(0,1), main = "Méthode ordinale", xlab = "k", ylab = "RI", pch = 16)
+
+##################################################### Circular points
+
+n = 150
+
+r1 = 5 # 5
+r2 = 2.8 # 2.8
+r3 = 1 # 1
+
+theta1 = runif(n, min = 0, max = 2*pi)
+theta2 = runif(n, min = 0, max = 2*pi)
+theta3 = runif(n, min = 0, max = 2*pi)
+
+sd = rnorm(n, 0, 0.25)
+
+group1 = matrix(c(r1 * cos(theta1) + sd,r1 * sin(theta1) + sd), nrow = n, ncol = 2)
+group2 = matrix(c(r2 * cos(theta2) + sd,r2 * sin(theta2) + sd), nrow = n, ncol = 2)
+group3 = matrix(c(r3 * cos(theta3) + sd,r3 * sin(theta3) + sd), nrow = n, ncol = 2)
+
+par(mfrow=c(1,3))
+
+plot(group1, xlim = c(-r1,r1), ylim = c(-r1,r1), xlab = "x", ylab = "y", col = "red", main = "Données", pch = 16)
+points(group2, col = "blue", pch = 16)
+points(group3, col = "green", pch = 16)
+
+dim1 = c(group1[,1],group2[,1],group3[,1])
+dim2 = c(group1[,2],group2[,2],group3[,2])
+
+data = matrix(c(dim1,dim2),nrow=3*n,ncol=2)
+L = as.matrix(dist(data,method="euclidean",diag=TRUE))
+
+clust_ref = c(rep(1,n),rep(2,n),rep(3,n))
+
+RI1 = c()
+for(k in 1:10){
+  fit1 = cmdscale(L, k = k)
+  clust1 = kmeans(x = fit1, centers = 3, iter.max = 20, nstart = 1000)$cluster
+  RI1[k] = rand.index(clust1, clust_ref)
+  print(k)
+}
+RI1
+
+k_opt1 = which.max(RI1)
+fit1_opt = cmdscale(L, k = k_opt1)
+clust1_opt = kmeans(x = fit1_opt, centers = 3, iter.max = 20, nstart = 1000)$cluster
+
+plot(dim1[which(clust1_opt==1)],dim2[which(clust1_opt==1)],xlab="x",ylab="y",col="green", xlim = c(-r1,r1), ylim = c(-r1,r1), main = "Méthode non-ordinale", pch = 16)
+points(dim1[which(clust1_opt==2)],dim2[which(clust1_opt==2)],col="red", pch = 16)
+points(dim1[which(clust1_opt==3)],dim2[which(clust1_opt==3)],col="blue", pch = 16)
+
+RI2 = c()
+for(k in 1:10){
+  kNN1 = make.kNNG(L, k = k, symm = TRUE, weight = FALSE)
+  # kNN1 = make.kRNG(L = L, k = k)
+  clust2 = spectral.clustering.new(A = kNN1, K = 3)
+  RI2[k] = rand.index(clust2, clust_ref)  
+  print(k)
+}
+RI2
+
+plot(dim1[which(clust2_opt==1)],dim2[which(clust2_opt==1)],xlab="x",ylab="y",col="green", xlim = c(-r1,r1), ylim = c(-r1,r1), main = "Méthode non-ordinale", pch = 16)
+points(dim1[which(clust2_opt==2)],dim2[which(clust2_opt==2)],col="red", pch = 16)
+points(dim1[which(clust2_opt==3)],dim2[which(clust2_opt==3)],col="blue", pch = 16)
+
+par(mfrow=c(1,2))
+
+plot(1:20,RI1, ylim = c(0,1), main = "Méthode non-ordinale", xlab = "d", ylab = "RI", pch = 16)
+plot(1:20,RI2, ylim = c(0,1), main = "Méthode ordinale", xlab = "k", ylab = "RI", pch = 16)
+
+####################################### Quatrieme simulation
+
+n = 200
+
+group1_x = rnorm(n/2,0,0.1)
+group1_y = rnorm(n/2,0,0.1)
+group2_x = rnorm(n/2,0,0.9)
+group2_y = rnorm(n/2,0,0.9)
+
+par(mfrow=c(1,3))
+
+plot(group2_x,group2_y,col="green", xlab = "x", ylab = "y",xlim = c(-2,2.5), ylim = c(-2.5,2),main="Données", pch = 16)
+points(group1_x,group1_y,col="red", pch = 16)
+
+
+dim1 = c(group1_x,group2_x)
+dim2 = c(group1_y,group2_y)
+
+data = matrix(c(dim1,dim2),nrow=n,ncol=2)
+L = as.matrix(dist(data,method="euclidean",diag=TRUE))
+
+clust_ref = c(rep(1,n/2),rep(2,n/2))
+
+RI1 = c()
+for(k in 1:20){
+  fit1 = cmdscale(L, k = k)
+  clust1 = kmeans(x = fit1, centers = 2, iter.max = 20, nstart = 1000)$cluster
+  RI1[k] = rand.index(clust1, clust_ref)
+}
+RI1
+
+k_opt1 = which.max(RI1)
+fit1_opt = cmdscale(L, k = k_opt1)
+clust1_opt = kmeans(x = fit1_opt, centers = 2, iter.max = 20, nstart = 1000)$cluster
+
+plot(dim1[which(clust1_opt==1)],dim2[which(clust1_opt==1)],xlab="x",ylab="y",xlim = c(-2,2.5), ylim = c(-2.5,2), col="green", main = "Méthode non-ordinale", pch = 16)
+points(dim1[which(clust1_opt==2)],dim2[which(clust1_opt==2)],col="red", pch = 16)
+
+RI2 = c()
+for(k in 1:100){
+  kNN1 = make.kNNG(L, k = k, symm = TRUE, weight = FALSE)
+  # kNN1 = make.kRNG(L = L, k = k)
+  clust2 = spectral.clustering.new(A = kNN1, K = 2)
+  RI2[k] = rand.index(clust2, clust_ref)  
+}
+RI2
+
+k_opt2 = which.max(RI2)
+kNN2_opt = make.kNNG(L, k = k_opt2, symm = TRUE, weight = FALSE)
+clust2_opt = spectral.clustering.new(A = kNN2_opt, K = 2)
+
+plot(dim1[which(clust2_opt==1)],dim2[which(clust2_opt==1)],xlab="x",ylab="y", xlim = c(-2,2.5), ylim = c(-2.5,2), col="green", main = "Méthode non-ordinale", pch = 16)
+points(dim1[which(clust2_opt==2)],dim2[which(clust2_opt==2)],col="red", pch = 16)
+
+par(mfrow=c(1,2))
+
+plot(1:20,RI1, ylim = c(0,1), main = "Méthode non-ordinale", xlab = "d", ylab = "RI", pch = 16)
+plot(1:20,RI2, ylim = c(0,1), main = "Méthode ordinale", xlab = "k", ylab = "RI", pch = 16)

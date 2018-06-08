@@ -2415,24 +2415,24 @@ eigenvalues_study <- function(size_fraction){
 #   return(list(res=res,kRNG=kRNG))
 # }
 #
-# make.kRNG <- function(L,k,sigma){
-#   n = dim(L)[1]
-#   count = 0
-#   kRNG = matrix(NA,nrow=n,ncol=n)
-#
-#   for(i in 1:n){
-#     for (j in 1:n){
-#       N = length(which((L[i,j]>pmax(L[i,-c(i,j)],L[j,-c(i,j)]))==TRUE))
-#       if(i!=j & N<k){
-#         kRNG[i,j] = 1 #exp(-N^2/((n-2)^2*sigma^2))
-#       }
-#       else{
-#         kRNG[i,j] = 0
-#       }
-#     }
-#   }
-#   return(kRNG)
-# }
+make.kRNG <- function(L,k,sigma){
+  n = dim(L)[1]
+  count = 0
+  kRNG = matrix(NA,nrow=n,ncol=n)
+
+  for(i in 1:n){
+    for (j in 1:n){
+      N = length(which((L[i,j]>pmax(L[i,-c(i,j)],L[j,-c(i,j)]))==TRUE))
+      if(i!=j & N<k){
+        kRNG[i,j] = 1 #exp(-N^2/((n-2)^2*sigma^2))
+      }
+      else{
+        kRNG[i,j] = 0
+      }
+    }
+  }
+  return(kRNG)
+}
 #
 # ####################################################### Index to compare two adjacency matrices
 #
